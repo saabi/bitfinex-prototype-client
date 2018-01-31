@@ -5,14 +5,14 @@ import * as path from "path";
 console.log(__dirname);
 const config: webpack.Configuration = {
     entry: [
-            'react-hot-loader/patch',
-            "./src/client/main.tsx"
+        'react-hot-loader/patch',
+        "./src/client/main.tsx"
     ],
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: [ "react-hot-loader/webpack", "ts-loader" ],
+                use: ["react-hot-loader/webpack", "ts-loader"],
                 exclude: /node_modules/
             },
             {
@@ -27,7 +27,7 @@ const config: webpack.Configuration = {
     plugins: [
         //new UglifyJSPlugin(),
         new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin()    ],
+        new webpack.HotModuleReplacementPlugin()],
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'public/js/dist'),
