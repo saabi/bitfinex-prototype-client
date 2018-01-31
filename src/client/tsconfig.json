@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "amd",
+    "moduleResolution": "node",
+    "pretty": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "alwaysStrict": true,
+    "diagnostics": true,
+    "listFiles": true,
+    "listEmittedFiles": true,
+    "locale": "en-us",
+    "jsx": "react"
+  }
+}
