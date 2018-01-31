@@ -15,7 +15,7 @@ let temp = false;
 
 function onBitfinexConnection() {
     console.log('Subscribing...');
-    Bitfinex.Stream.subscribeTicker('btcusd', () => undefined);
+    symbols.forEach(s => Bitfinex.Stream.subscribeTicker(s, t => console.log(t)));
 }
 
 async function init() {
@@ -26,6 +26,7 @@ async function init() {
 
     symbols = await Bitfinex.V1.getSymbols();
     symbolsDetails = await Bitfinex.V1.getSymbolsDetails();
+
     //#region Group symbols by base coin.
     baseCoinGroups = {};
     for (let i = 0; i < symbolsDetails.length; i++) {
@@ -37,6 +38,17 @@ async function init() {
         }
         baseCoin.push(s);
     }
+    /* // Alternative implementation.
+    baseCoinGroups = symbolsDetails.reduce((groups, v) => {
+        let baseCoinName = v.pair.substr(0, 3);
+        let baseCoin = groups[baseCoinName];
+        if (!baseCoin) {
+            groups[baseCoinName] = baseCoin = [];
+        }
+        baseCoin.push(v);
+        return groups;
+    }, {} as { [name: string]: BF.SymbolDetail[] });
+    */
     //#endregion
 
     let tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
