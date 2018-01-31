@@ -2,7 +2,22 @@ import * as webpack from "webpack";
 import * as path from "path";
 //const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-console.log(__dirname);
+import * as express from 'express';
+import fetch from 'node-fetch';
+
+function setupBitfinexProxy(app: express.Application) {
+    app.get('/v1/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            console.log('https://api.bitfinex.com' + req.path);
+            let response = await fetch('https://api.bitfinex.com' + req.path);
+            let json = await response.json();
+            res.json(json);
+        } catch (e) {
+            next(e)
+        }
+    });
+}
+
 const config: webpack.Configuration = {
     entry: [
         'react-hot-loader/patch',
@@ -37,7 +52,8 @@ const config: webpack.Configuration = {
     devServer: {
         hotOnly: true,
         inline: true,
-        contentBase: 'public/'
+        contentBase: 'public/',
+        before: setupBitfinexProxy
     }
 }
 
