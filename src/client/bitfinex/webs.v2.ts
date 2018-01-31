@@ -1,116 +1,5 @@
 import * as BF from './types';
 
-//#region Private Types and Interfaces
-
-type SubscriptionHandler = (msg: any) => void;
-
-interface SubscriptionHandlerList {
-    [key: string]: SubscriptionHandler[];
-}
-
-//#endregion
-
-//#region Private code
-
-var wSocket: WebSocket;
-var connectionHandlers: (() => void)[] = [];
-var connected = false;
-var subscriptions: SubscriptionHandlerList = {};
-var idMap: {[key:string]: number} = {};
-var keyMap: {[id:number]: string} = {};
-
-Stream.addConnectionHandler(() => connected = true);
-
-function reconnect() {
-    if (!connected)
-        setTimeout(reconnect, 10000);
-    Stream.connect();
-}
-
-function connectionHandler(ev: Event): any {
-    console.log('Connected to Bitfinex.');
-    console.info(ev);
-    connectionHandlers.forEach((handler) => handler());
-}
-
-function disconnectionHandler(ev: CloseEvent) {
-    connected = false;
-    if (ev.wasClean) {
-        console.log('Bitfinex connection closed.');
-        console.info(ev);
-    }
-    else {
-        console.log('Bitfinex connection closed unexcpectedly.');
-        console.info(ev);
-        setTimeout(reconnect, 10000);
-    }
-}
-
-function errorHandler(msg: ErrorEvent) {
-    console.error(msg)
-}
-
-const subscribedJumpTable: {
-    [name:string]: (r:BF.Subscription) => string;
-} = {
-    ticker: (r:BF.TradeTickerSubscription) => r.channel + ':' + r.pair,
-    fticker: (r:BF.FundingTickerSubscription) => r.channel + ':' + r.symbol,
-    trades: (r:BF.TradeSubscription) => r.channel + ':' + r.pair,
-    book: (r:BF.BookSubscription) => r.channel + ':' + r.pair,
-    candles: (r:BF.CandleSubscription) => r.channel + ':' + r.key
-}
-
-const eventJumpTable: {
-    [name:string]: (r:BF.BitfinexResponse) => void;
-} = {
-    info: (r:BF.BitfinexResponse) => {
-        console.info(r);
-    },
-    auth: (r:BF.BitfinexResponse) => {throw new Error('Not Implenented!')},
-    subscribed: (r:BF.BitfinexResponse) => {
-        let key = subscribedJumpTable[r.channel](r as BF.Subscription);
-        idMap[key] = r.chanId;
-        keyMap[r.chanId] = key;
-    },
-    unsubscribed: (r:BF.BitfinexResponse) => {
-        console.log (r);
-        idMap = {};
-        keyMap = {};
-        subscriptions = {};
-    },
-    error: (r:BF.BitfinexResponse) => {
-        console.error (r);
-        debugger;
-    }
-};
-
-function messageHandler(msg: MessageEvent) {
-    let json = JSON.parse(msg.data);
-    if (Array.isArray(json)) {
-        let chanId = json[0];
-        let payload = json[1];
-        if (Array.isArray(payload)) {
-            let key = keyMap[chanId];
-            let [channel, k1, k2] = key.split(':');
-            let subkey = k2? k1 + ':' + k2 : k1;
-            console.log( `Message on ${channel} - ${subkey}: ${payload.join(',')}`);
-        }
-        else if (payload === 'hb') {
-            console.log('hb');
-        }
-    }
-    else if ('event' in json) {
-        let response = json as BF.BitfinexResponse;
-        eventJumpTable[response.event](response);
-    }
-    else {
-        console.error(msg);
-        throw new Error('Unidentified message received.');
-    }
-}
-
-//#endregion
-
 export namespace Stream {
 
     //#region Public functions
@@ -264,3 +153,115 @@ export namespace Stream {
     //#endregion
 
 }
+
+//#region Private Types and Interfaces
+
+type SubscriptionHandler = (msg: any) => void;
+
+interface SubscriptionHandlerList {
+    [key: string]: SubscriptionHandler[];
+}
+
+//#endregion
+
+//#region Private code
+
+var wSocket: WebSocket;
+var connectionHandlers: (() => void)[] = [];
+var connected = false;
+var subscriptions: SubscriptionHandlerList = {};
+var idMap: {[key:string]: number} = {};
+var keyMap: {[id:number]: string} = {};
+
+Stream.addConnectionHandler(() => connected = true);
+
+function reconnect() {
+    if (!connected)
+        setTimeout(reconnect, 10000);
+    Stream.connect();
+}
+
+function connectionHandler(ev: Event): any {
+    console.log('Connected to Bitfinex.');
+    console.info(ev);
+    connectionHandlers.forEach((handler) => handler());
+}
+
+function disconnectionHandler(ev: CloseEvent) {
+    connected = false;
+    if (ev.wasClean) {
+        console.log('Bitfinex connection closed.');
+        console.info(ev);
+    }
+    else {
+        console.log('Bitfinex connection closed unexcpectedly.');
+        console.info(ev);
+        setTimeout(reconnect, 10000);
+    }
+}
+
+function errorHandler(msg: ErrorEvent) {
+    console.error(msg)
+}
+
+const subscribedJumpTable: {
+    [name:string]: (r:BF.Subscription) => string;
+} = {
+    ticker: (r:BF.TradeTickerSubscription) => r.channel + ':' + r.pair,
+    fticker: (r:BF.FundingTickerSubscription) => r.channel + ':' + r.symbol,
+    trades: (r:BF.TradeSubscription) => r.channel + ':' + r.pair,
+    book: (r:BF.BookSubscription) => r.channel + ':' + r.pair,
+    candles: (r:BF.CandleSubscription) => r.channel + ':' + r.key
+}
+
+const eventJumpTable: {
+    [name:string]: (r:BF.BitfinexResponse) => void;
+} = {
+    info: (r:BF.BitfinexResponse) => {
+        console.info(r);
+    },
+    auth: (r:BF.BitfinexResponse) => {throw new Error('Not Implenented!')},
+    subscribed: (r:BF.BitfinexResponse) => {
+        let key = subscribedJumpTable[r.channel](r as BF.Subscription);
+        idMap[key] = r.chanId;
+        keyMap[r.chanId] = key;
+    },
+    unsubscribed: (r:BF.BitfinexResponse) => {
+        console.log (r);
+        idMap = {};
+        keyMap = {};
+        subscriptions = {};
+    },
+    error: (r:BF.BitfinexResponse) => {
+        console.error (r);
+        debugger;
+    }
+};
+
+function messageHandler(msg: MessageEvent) {
+    let json = JSON.parse(msg.data);
+    if (Array.isArray(json)) {
+        let chanId = json[0];
+        let payload = json[1];
+        if (Array.isArray(payload)) {
+            let key = keyMap[chanId];
+            let [channel, k1, k2] = key.split(':');
+            let subkey = k2? k1 + ':' + k2 : k1;
+            console.log( `Message on ${channel} - ${subkey}: ${payload.join(',')}`);
+        }
+        else if (payload === 'hb') {
+            console.log('hb');
+        }
+    }
+    else if ('event' in json) {
+        let response = json as BF.BitfinexResponse;
+        eventJumpTable[response.event](response);
+    }
+    else {
+        console.error(msg);
+        throw new Error('Unidentified message received.');
+    }
+}
+
+//#endregion
+
