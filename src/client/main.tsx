@@ -9,13 +9,13 @@ import { BitfinexApp } from './components';
 
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
-let baseCoinGroups: {[name:string]: typeof symbolsDetails};
+let baseCoinGroups: { [name: string]: typeof symbolsDetails };
 
 let temp = false;
 
-function onBitfinexConnection() {    
+function onBitfinexConnection() {
     console.log('Subscribing...');
-    Bitfinex.Stream.subscribeTicker('btcusd', () => undefined );
+    Bitfinex.Stream.subscribeTicker('btcusd', () => undefined);
 }
 
 async function init() {
@@ -32,19 +32,14 @@ async function init() {
         let s = symbolsDetails[i];
         let baseCoinName = s.pair.substr(0, 3);
         let baseCoin = baseCoinGroups[baseCoinName];
-        if ( !baseCoin ) {
+        if (!baseCoin) {
             baseCoinGroups[baseCoinName] = baseCoin = [];
         }
         baseCoin.push(s);
     }
     //#endregion
 
-    let symbols2: string[] = [];
-    symbols.forEach( (s) => {
-        symbols2.push('t'+s.toUpperCase());
-        symbols2.push('f'+s.toUpperCase());
-    })
-    let tickers = await Bitfinex.V2.getTickers(symbols2);
+    let tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
 
     console.log(tickers);
 
@@ -59,11 +54,11 @@ init();
 
 //#region Hot Module Reloading
 async function renderApp() {
-    ReactDOM.render(<AppContainer><BitfinexApp/></AppContainer>, document.getElementById('app-root'));
+    ReactDOM.render(<AppContainer><BitfinexApp /></AppContainer>, document.getElementById('app-root'));
 }
 async function loadAndRender() {
-    const NextApp = require<{BitfinexApp: typeof BitfinexApp}>('./components').BitfinexApp;
-    ReactDOM.render(<AppContainer><NextApp/></AppContainer>, document.getElementById('app-root'));
+    const NextApp = require<{ BitfinexApp: typeof BitfinexApp }>('./components').BitfinexApp;
+    ReactDOM.render(<AppContainer><NextApp /></AppContainer>, document.getElementById('app-root'));
 }
 
 if (module.hot) {
