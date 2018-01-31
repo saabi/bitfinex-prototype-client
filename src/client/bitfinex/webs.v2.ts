@@ -190,7 +190,7 @@ function reconnect() {
 
 function connectionHandler(ev: Event): any {
     console.log('Connected to Bitfinex.');
-    console.info(ev);
+    console.debug(ev);
     connectionHandlers.forEach((handler) => handler());
 }
 
@@ -198,11 +198,11 @@ function disconnectionHandler(ev: CloseEvent) {
     connected = false;
     if (ev.wasClean) {
         console.log('Bitfinex connection closed.');
-        console.info(ev);
+        console.debug(ev);
     }
     else {
-        console.log('Bitfinex connection closed unexcpectedly.');
-        console.info(ev);
+        console.error('Bitfinex connection closed unexcpectedly.');
+        console.debug(ev);
         setTimeout(reconnect, 10000);
     }
 }
@@ -225,7 +225,7 @@ const eventJumpTable: {
     [name: string]: (r: BF.BitfinexResponse) => void;
 } = {
         info: (r: BF.BitfinexResponse) => {
-            console.info(r);
+            console.debug(r);
         },
         auth: (r: BF.BitfinexResponse) => { throw new Error('Not Implenented!') },
         subscribed: (r: BF.BitfinexResponse) => {
@@ -234,7 +234,7 @@ const eventJumpTable: {
             keyMap[r.chanId] = key;
         },
         unsubscribed: (r: BF.BitfinexResponse) => {
-            console.log(r);
+            console.debug(r);
             idMap = {};
             keyMap = {};
             subscriptions = {};
@@ -297,12 +297,12 @@ function messageHandler(msg: MessageEvent) {
             let o = channelJumpTable[channel](payload);
 
             let subkey = k2 ? k1 + ':' + k2 : k1;
-            console.log(`Message on ${channel} - ${subkey}`);
+            console.debug(`Message on ${channel} - ${subkey}`);
 
             sub.forEach( s => s(o) );
         }
         else if (payload === 'hb') {
-            console.log('hb');
+            console.debug('hb');
         }
     }
     else if ('event' in json) {

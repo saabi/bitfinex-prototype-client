@@ -14,8 +14,8 @@ let baseCoinGroups: { [name: string]: typeof symbolsDetails };
 let temp = false;
 
 function onBitfinexConnection() {
-    console.log('Subscribing...');
-    symbols.forEach(s => Bitfinex.Stream.subscribeTicker(s, t => console.log(t)));
+    console.debug('Subscribing...');
+    symbols.forEach(s => Bitfinex.Stream.subscribeTicker(s, t => console.debug(t)));
 }
 
 async function init() {
@@ -53,7 +53,7 @@ async function init() {
 
     let tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
 
-    console.log(tickers);
+    console.debug(tickers);
 
     Bitfinex.Stream.addConnectionHandler(onBitfinexConnection)
     Bitfinex.Stream.connect();
