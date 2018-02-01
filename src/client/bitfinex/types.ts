@@ -36,6 +36,18 @@ export interface FundingPairTick extends TradingPairTick {
     askPeriod: number;
 }
 
+export interface BookTick {
+
+}
+
+export interface TradeTick {
+
+}
+
+export interface CandleTick {
+
+}
+
 export interface Ticks {
     [symbol: string]: TradingPairTick | FundingPairTick;
 }
@@ -88,3 +100,15 @@ export interface CandleSubscription extends Subscription {
     channel: 'candles';
     key: string;
 }    
+
+export type SubscriptionHandler =
+    ((r: TradingPairTick) => void) |
+    ((r: FundingPairTick) => void) |
+    ((r: TradeTick) => void) |
+    ((r: BookTick) => void) |
+    ((r: CandleTick) => void);
+
+export interface SubscriptionHandlerList {
+    [key: string]: SubscriptionHandler[];
+}
+    
