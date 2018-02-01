@@ -190,7 +190,7 @@ function reconnect() {
 
 function connectionHandler(ev: Event): any {
     console.log('Connected to Bitfinex.');
-    console.debug(ev);
+    //console.debug(ev);
     connectionHandlers.forEach((handler) => handler());
 }
 
@@ -198,7 +198,7 @@ function disconnectionHandler(ev: CloseEvent) {
     connected = false;
     if (ev.wasClean) {
         console.log('Bitfinex connection closed.');
-        console.debug(ev);
+        //console.debug(ev);
     }
     else {
         console.error('Bitfinex connection closed unexcpectedly.');
@@ -297,12 +297,12 @@ function messageHandler(msg: MessageEvent) {
             let o = channelJumpTable[channel](payload);
 
             let subkey = k2 ? k1 + ':' + k2 : k1;
-            console.debug(`Message on ${channel} - ${subkey}`);
+            //console.debug(`Message on ${channel} - ${subkey}`);
 
             sub.forEach( s => s(o) );
         }
         else if (payload === 'hb') {
-            console.debug('hb');
+            //console.debug('hb');
         }
     }
     else if ('event' in json) {

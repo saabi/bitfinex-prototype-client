@@ -27,8 +27,9 @@ export namespace V2 {
         let response = await getJSON<any[][]>('tickers?symbols=' + tickerList.join(','));
         let tickers: BF.Tickers = {};
         response.forEach((ticker) => {
+            let symbol = (<string>ticker[0]).substr(1,6).toUpperCase();
             if (ticker.length === 11) {
-                tickers[ticker[0]] = {
+                tickers[symbol] = {
                     bid: ticker[1],
                     bidSize: ticker[2],
                     ask: ticker[3],
@@ -42,7 +43,7 @@ export namespace V2 {
                 }
             }
             else {
-                tickers[ticker[0]] = {
+                tickers[symbol] = {
                     frr: ticker[1],
                     bid: ticker[2],
                     bidSize: ticker[3],
