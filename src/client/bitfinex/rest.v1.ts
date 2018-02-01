@@ -1,7 +1,7 @@
 import * as BF from './types';
 
 export namespace V1 {
-    const apiUrl = 'http://localhost:8080/v1/';  // The web service proxy URL
+    const apiUrl = '/v1/';  // The web service proxy URL
 
     async function getJSON<T>(path: string): Promise<T> {
         let r = await fetch(apiUrl + path);

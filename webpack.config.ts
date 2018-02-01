@@ -53,7 +53,8 @@ const config: webpack.Configuration = {
         hotOnly: true,
         inline: true,
         contentBase: 'public/',
-        before: setupBitfinexProxy
+        before: setupBitfinexProxy,
+        allowedHosts: ['.lan']
     }
 }
 
