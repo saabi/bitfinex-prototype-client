@@ -1,9 +1,15 @@
 import * as BF from './types';
-import { FundingPairTick } from './types';
 
 export namespace Stream {
 
     //#region Public functions
+
+    /**
+     * Return `true` if conected.
+     */
+    export function isConnected() {
+        return connected;
+    }
 
     /**
      * Adds a handler that will be called everytime a connection is established.
@@ -36,7 +42,7 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribe(key: string, payload: any, handler: (o:BF.TradingPairTick) => void) {
+    export function subscribe(key: string, payload: any, handler: BF.SubscriptionHandler) {
         let sub = subscriptions[key];
         if (!sub) {
             subscriptions[key] = sub = [];
@@ -47,13 +53,14 @@ export namespace Stream {
         if (i >= 0)
             throw new Error('Already subscribed.');
         sub.push(handler);
+        return {key, handler};
     }
 
     /**
      * Unsubscribes from a channel.
      * @param channel 
      */
-    export function unsubscribe(key: string, handler: (o:BF.TradingPairTick) => void) {
+    export function unsubscribe(key: string, handler: BF.SubscriptionHandler) {
         let sub = subscriptions[key];
         if (!sub || sub.length === 0)
             throw new Error('Not subscribed.');
@@ -78,7 +85,7 @@ export namespace Stream {
     export function subscribeTicker(symbol: string, handler: (o:BF.TradingPairTick) => void) {
         let channel = 'ticker';
         symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + symbol, {
+        return subscribe(channel + ':' + symbol, {
             channel,
             symbol
         }, handler);
@@ -92,7 +99,7 @@ export namespace Stream {
     export function subscribeFundingTicker(symbol: string, handler: (o:BF.FundingPairTick) => void) {
         let channel = 'fticker';
         symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + symbol, {
+        return subscribe(channel + ':' + symbol, {
             channel,
             symbol
         }, handler);
@@ -103,10 +110,10 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeTrades(symbol: string, handler: (o:any) => void) {
+    export function subscribeTrades(symbol: string, handler: (o:BF.TradeTick) => void) {
         let channel = 'trades';
         symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + symbol, {
+        return subscribe(channel + ':' + symbol, {
             channel,
             symbol
         }, handler);
@@ -116,10 +123,10 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeBook(symbol: string, prec: BF.Precision, freq: number, len: number, handler: (o:any) => void) {
+    export function subscribeBook(symbol: string, prec: BF.Precision, freq: number, len: number, handler: (o:BF.BookTick) => void) {
         let channel = 'book';
         symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + symbol, {
+        return subscribe(channel + ':' + symbol, {
             channel,
             symbol,
             prec,
@@ -132,10 +139,10 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeRawBook(symbol: string, len: number, handler: (o:any) => void) {
+    export function subscribeRawBook(symbol: string, len: number, handler: (o:BF.BookTick) => void) {
         let channel = 'book';
         symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + symbol, {
+        return subscribe(channel + ':' + symbol, {
             channel,
             symbol,
             prec: 'RO',
@@ -148,10 +155,10 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeCandles(key: string, handler: (o:any) => void) {
+    export function subscribeCandles(key: string, handler: (o:BF.CandleTick) => void) {
         let channel = 'candles';
         //symbol = symbol.toUpperCase();
-        subscribe(channel + ':' + key, {
+        return subscribe(channel + ':' + key, {
             channel,
             key
         }, handler);
@@ -161,22 +168,12 @@ export namespace Stream {
 
 }
 
-//#region Private Types and Interfaces
-
-type SubscriptionHandler = (msg: any) => void;
-
-interface SubscriptionHandlerList {
-    [key: string]: SubscriptionHandler[];
-}
-
-//#endregion
-
 //#region Private code
 
 var wSocket: WebSocket;
 var connectionHandlers: (() => void)[] = [];
 var connected = false;
-var subscriptions: SubscriptionHandlerList = {};
+var subscriptions: BF.SubscriptionHandlerList = {};
 var idMap: { [key: string]: number } = {};
 var keyMap: { [id: number]: string } = {};
 
@@ -207,12 +204,19 @@ function disconnectionHandler(ev: CloseEvent) {
     }
 }
 
-function errorHandler(msg: ErrorEvent) {
+function errorHandler(msg: ErrorEvent | Event) {
     console.error(msg)
 }
 
+type KeyGenerator =
+    ((r: BF.TradeTickerSubscription) => string) |
+    ((r: BF.FundingTickerSubscription) => string) |
+    ((r: BF.TradeSubscription) => string) |
+    ((r: BF.BookSubscription) => string) |
+    ((r: BF.CandleSubscription) => string)
+
 const subscribedJumpTable: {
-    [name: string]: (r: BF.Subscription) => string;
+    [name: string]: KeyGenerator;
 } = {
         ticker: (r: BF.TradeTickerSubscription) => r.channel + ':' + r.pair,
         fticker: (r: BF.FundingTickerSubscription) => r.channel + ':' + r.symbol,
@@ -229,7 +233,7 @@ const eventJumpTable: {
         },
         auth: (r: BF.BitfinexResponse) => { throw new Error('Not Implenented!') },
         subscribed: (r: BF.BitfinexResponse) => {
-            let key = subscribedJumpTable[r.channel](r as BF.Subscription);
+            let key = (<Function>subscribedJumpTable[r.channel]) (r);  // casting to supress compiler error
             idMap[key] = r.chanId;
             keyMap[r.chanId] = key;
         },
@@ -262,7 +266,7 @@ const channelJumpTable: {
                 low: r[9]
             }
         },
-        fticker: (r: any[]) : FundingPairTick => {
+        fticker: (r: any[]) : BF.FundingPairTick => {
             return {
                 frr: r[0],
                 bid: r[1],
@@ -299,7 +303,7 @@ function messageHandler(msg: MessageEvent) {
             let subkey = k2 ? k1 + ':' + k2 : k1;
             //console.debug(`Message on ${channel} - ${subkey}`);
 
-            sub.forEach( s => s(o) );
+            sub.forEach( s => (<Function>s)(o) ); // casting to suppress compiler error
         }
         else if (payload === 'hb') {
             //console.debug('hb');
