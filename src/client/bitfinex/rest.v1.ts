@@ -22,7 +22,10 @@ export namespace V1 {
      * Gets the list of symbols with details from the Bitfinex API server.
      */
     export async function getSymbolsDetails() {
-        return await getJSON<BF.SymbolDetail[]>('symbols_details');
+        let result = await getJSON<BF.SymbolDetail[]>('symbols_details');
+        for (let i = 0; i < result.length; i++) 
+            result[i].pair = result[i].pair.toUpperCase()
+        return result;
     }
 }
 
