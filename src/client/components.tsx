@@ -13,7 +13,7 @@ class Ticker extends React.Component<Exchange.TickerProps> {
                 <li key={symbol}>
                     <h1>{symbol}</h1>
                     <ul>
-                        {group.map(i => (<li key={i.pair}><ul><li>{i.pair}</li><li>{tickers[i.pair].dailyChange}</li><li>{tickers[i.pair].volume}</li></ul></li>))}
+                        {group.map(i => (<li key={i.pair}><ul><li>{i.pair}</li><li>{tickers[i.pair].lastPrice}</li><li>{tickers[i.pair].dailyChange}</li><li>{tickers[i.pair].volume}</li></ul></li>))}
                     </ul>
                 </li >
             )
