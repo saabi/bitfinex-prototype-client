@@ -3,69 +3,77 @@ import * as BF from './bitfinex/types';
 import { Exchange } from './store';
 import { replaceDictionary } from './utils';
 
-let boundStore: Exchange.AppStore;
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
 let baseCoinGroups: { [name: string]: BF.SymbolDetail[] };
 let tickers: BF.Ticks;
 
 function onBitfinexConnection() {
-    console.debug('Subscribing to Tickers...');
-    symbols.forEach(s => Bitfinex.Stream.subscribeTicker(s, t => {
-        //console.debug({s,t});
-        tickers = replaceDictionary(tickers, s, t);
-        boundStore.set('tickers')(tickers);
-    }));
 }
 
-async function init() {
-    let status = await Bitfinex.V2.getStatus();
-    if (status === 'maintenance') {
-        throw new Error('Bitfinex is in maintenance right now. Please try again later.');
-    }
+export namespace Backend {
 
-    symbols = await Bitfinex.V1.getSymbols();
-    symbolsDetails = await Bitfinex.V1.getSymbolsDetails();
-
-    //#region Group symbols by base coin.
-    baseCoinGroups = {};
-    for (let i = 0; i < symbolsDetails.length; i++) {
-        let s = symbolsDetails[i];
-        let baseCoinName = s.pair.substr(0, 3);
-        let baseCoin = baseCoinGroups[baseCoinName];
-        if (!baseCoin) {
-            baseCoinGroups[baseCoinName] = baseCoin = [];
+    export async function init() {
+        let status = await Bitfinex.V2.getStatus();
+        if (status === 'maintenance') {
+            throw new Error('Bitfinex is in maintenance right now. Please try again later.');
         }
-        baseCoin.push(s);
-    }
-    /* // Alternative implementation.
-    baseCoinGroups = symbolsDetails.reduce((groups, v) => {
-        let baseCoinName = v.pair.substr(0, 3);
-        let baseCoin = groups[baseCoinName];
-        if (!baseCoin) {
-            groups[baseCoinName] = baseCoin = [];
+    
+        symbols = await Bitfinex.V1.getSymbols();
+        symbolsDetails = await Bitfinex.V1.getSymbolsDetails();
+    
+        //#region Group symbols by base coin.
+        baseCoinGroups = {};
+        for (let i = 0; i < symbolsDetails.length; i++) {
+            let s = symbolsDetails[i];
+            let baseCoinName = s.pair.substr(0, 3);
+            let baseCoin = baseCoinGroups[baseCoinName];
+            if (!baseCoin) {
+                baseCoinGroups[baseCoinName] = baseCoin = [];
+            }
+            baseCoin.push(s);
         }
-        baseCoin.push(v);
-        return groups;
-    }, {} as { [name: string]: BF.SymbolDetail[] });
-    */
-    //#endregion
-
-    tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
-    //console.debug(tickers);
-
-    boundStore.set('tickers')(tickers);
-    boundStore.set('groups')(baseCoinGroups);
+        //#endregion
     
-    Bitfinex.Stream.addConnectionHandler(onBitfinexConnection)
-    Bitfinex.Stream.connect();
-}
+        tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
+        //console.debug(tickers);
 
-export namespace Bindings {
+        Bitfinex.Stream.connect();
+    }
     
-    export async function bindStore(store: Exchange.AppStore) {
-        boundStore = store;
-        await init();
+    export async function bindTickerStore(store: Exchange.TickerStore) {
+        let tickerStore = store;
+
+        tickerStore.set('tickers')(tickers);
+        tickerStore.set('groups')(baseCoinGroups);
+
+        let subscriptions: BF.SubscriptionHandlerList = {};
+
+        function subscribeToAllTickers() {
+            console.debug('Subscribing to Tickers...');
+  
+            symbols.forEach( s => {
+                let result = Bitfinex.Stream.subscribeTicker(s, t => {
+
+                    tickers = replaceDictionary(tickers, s, t);
+                    tickerStore.set('tickers')(tickers);
+                });
+                subscriptions[result.key] = [result.handler];
+            });
+        }
+        function unsubscribeFromAllTickers() {
+            Object.getOwnPropertyNames(subscriptions).forEach( (n) => {
+                Bitfinex.Stream.unsubscribe(n, subscriptions[n][0]) 
+            });
+            subscriptions = {};
+        }
+        let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
     }
 
+    export async function bindBookStore(store: Exchange.BookStore) {
+    }
+    export async function bindTradesStore(store: Exchange.TradesStore) {
+    }
+    export async function bindAppStore(store: Exchange.AppStore) {
+    }
 }
