@@ -10,9 +10,9 @@ let baseCoinGroups: { [name: string]: BF.SymbolDetail[] };
 let tickers: BF.Ticks;
 
 function onBitfinexConnection() {
-    console.debug('Subscribing...');
+    console.debug('Subscribing to Tickers...');
     symbols.forEach(s => Bitfinex.Stream.subscribeTicker(s, t => {
-        console.debug(t);
+        //console.debug({s,t});
         tickers = replaceDictionary(tickers, s, t);
         boundStore.set('tickers')(tickers);
     }));
@@ -52,7 +52,7 @@ async function init() {
     //#endregion
 
     tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
-    console.debug(tickers);
+    //console.debug(tickers);
 
     boundStore.set('tickers')(tickers);
     boundStore.set('groups')(baseCoinGroups);
