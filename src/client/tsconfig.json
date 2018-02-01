@@ -4,6 +4,7 @@
     "module": "amd",
     "moduleResolution": "node",
     "pretty": true,
+    "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -15,7 +16,7 @@
     "sourceMap": true,
     "alwaysStrict": true,
     "diagnostics": true,
-    "listFiles": true,
+    "listFiles": false,
     "listEmittedFiles": true,
     "locale": "en-us",
     "jsx": "react"
