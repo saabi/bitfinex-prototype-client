@@ -23,9 +23,9 @@ export namespace V2 {
     /**
      * Returns a high level view of requested tickers.
      */
-    export async function getTickers(tickerList: string[]): Promise<BF.Tickers> {
+    export async function getTickers(tickerList: string[]): Promise<BF.Ticks> {
         let response = await getJSON<any[][]>('tickers?symbols=' + tickerList.join(','));
-        let tickers: BF.Tickers = {};
+        let tickers: BF.Ticks = {};
         response.forEach((ticker) => {
             let symbol = (<string>ticker[0]).substr(1,6).toUpperCase();
             if (ticker.length === 11) {

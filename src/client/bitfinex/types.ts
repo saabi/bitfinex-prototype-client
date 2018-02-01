@@ -36,7 +36,7 @@ export interface FundingPairTick extends TradingPairTick {
     askPeriod: number;
 }
 
-export interface Tickers {
+export interface Ticks {
     [symbol: string]: TradingPairTick | FundingPairTick;
 }
 
