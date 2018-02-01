@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A prototype Bitfinex client.",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --host 0.0.0.0",
     "build": "webpack"
   },
   "author": "Sebastian Ferreyra",
