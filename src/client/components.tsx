@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Exchange } from './store'
 
-class Ticker extends React.Component<Exchange.TickerProps> {
+export class Ticker extends React.Component<Exchange.TickerProps> {
     render() {
-        const tickers = this.props.tickers;
-        const groups = this.props.groups;
+        const store = this.props.store;
+        const tickers = store.get('tickers');
+        const groups = store.get('groups');
 
         let groupNames = Object.getOwnPropertyNames(groups);
         let tableRows = groupNames.map((symbol) => {
@@ -15,12 +16,13 @@ class Ticker extends React.Component<Exchange.TickerProps> {
                     <ul>
                         {group.map(i => (<li key={i.pair}><ul><li>{i.pair}</li><li>{tickers[i.pair].lastPrice}</li><li>{tickers[i.pair].dailyChange}</li><li>{tickers[i.pair].volume}</li></ul></li>))}
                     </ul>
-                </li >
+                </li>
             )
         });
 
-        return(
-            <div id = 'ticker' >
+        return (
+            <div id='ticker'>
+                <h2>Ticker</h2>
                 <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
                 <ul>{tableRows}</ul>
             </div>
@@ -28,35 +30,22 @@ class Ticker extends React.Component<Exchange.TickerProps> {
     }
 }
 
-class Book extends React.Component<Exchange.BookProps> {
+export class Book extends React.Component<Exchange.BookProps> {
     render() {
         return (
             <div id='book'>
-                Order Book
+                <h2>Order Book</h2>
             </div>
         )
     }
 }
 
-class Trades extends React.Component<Exchange.TradesProps> {
+export class Trades extends React.Component<Exchange.TradesProps> {
     render() {
         return (
             <div id='trades'>
-                Trades
+                <h2>Trades</h2>
             </div>
         )
-    }
-}
-
-export class ExchangeApp extends React.Component<Exchange.AppProps> {
-    render() {
-        let tickers = this.props.store.get('tickers');
-        let groups = this.props.store.get('groups');
-        return (
-            <>
-            <Ticker tickers={tickers} groups={groups} orderColumn='symbol' orderDirection='unsorted'/>
-            <Book />
-            <Trades />
-            </>)
     }
 }
