@@ -5,6 +5,7 @@ import * as path from "path";
 import * as express from 'express';
 import fetch from 'node-fetch';
 
+// Bitfinex v1 API is CORS restricted. This proxies calls through the wbepack-dev-server to bypass restriction.
 function setupBitfinexProxy(app: express.Application) {
     app.get('/v1/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {

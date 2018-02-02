@@ -29,7 +29,7 @@ function bindStoresToBackend() {
  * in the stores update the components and vice versa.
  * 
  * This is done in here so as to support hot module replacement
- * with React components while developing.
+ * with Unduxed React components while developing.
  * 
  * @param module The module containing the React components.
  */
@@ -59,7 +59,7 @@ async function launch() {
     const App = connectComponentsToStores(Components);
     render(App);
 
-    // connects to Bitfinex and then binds the stores.
+    // connects to backend server and then binds the stores.
     await Backend.init();
     bindStoresToBackend();
 }
