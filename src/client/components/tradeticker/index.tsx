@@ -10,21 +10,38 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
         let groupNames = Object.getOwnPropertyNames(groups);
         let tableRows = groupNames.map((symbol) => {
             let group = groups[symbol];
+            let c = 0;
             return (
-                <li key={symbol}>
-                    <h1>{symbol}</h1>
-                    <ul>
-                        {group.map(i => (<li key={i.pair}><ul><li>{i.pair}</li><li>{tickers[i.pair].lastPrice}</li><li>{tickers[i.pair].dailyChange}</li><li>{tickers[i.pair].volume}</li></ul></li>))}
-                    </ul>
-                </li>
+                <tbody key={symbol}>
+                    {group.map(gi => {
+                        c++;
+                        let i = tickers[gi.pair];
+                        return (
+                            <tr key={gi.pair}>
+                                {(c===1) ? <td rowSpan={group.length}>{symbol}</td> : null}
+                                <td>{(i.lastPrice).toLocaleString()} {gi.pair.substr(3,3)}</td>
+                                <td className={i.dailyChangePerc>0?'positive':'negative'}>{(100*i.dailyChangePerc).toFixed(2)}%</td>
+                                <td>{Math.round(i.volume).toLocaleString()}</td>
+                            </tr>)}
+                        )}
+                </tbody>
             )
         });
 
         return (
             <div id='tradesticker' className='widget'>
                 <h3>Ticker</h3>
-                <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
-                <ul>{tableRows}</ul>
+                <table className='ticker'>
+                    <thead>
+                        <tr>
+                            <td>symbol<button>{}</button></td>
+                            <td>last<button>{}</button></td>
+                            <td>24hr<button>{}</button></td>
+                            <td>Vol Self<button>{}</button></td>
+                        </tr>
+                    </thead>
+                    {tableRows}
+                </table>
             </div>
         )
     }

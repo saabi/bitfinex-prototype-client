@@ -9,7 +9,7 @@ html, body, #app-root {
 }
 
 html {
-    background: #202020;
+    background: #404040;
     color: rgb(224, 224, 224);
     font-family: sans-serif;
 }
@@ -21,7 +21,7 @@ html {
         "sidebar1 content content"
         "sidebar2 underbar1 underbar2"
         "footer footer footer";
-    grid-template-columns: 200px auto auto;
+    grid-template-columns: auto auto auto;
     grid-template-rows: 0fr auto auto 0fr;
     justify-content: stretch;
     align-content: stretch;
@@ -31,9 +31,11 @@ html {
     margin: 2px;
     border-radius: 2px;
     padding: 2px;
-    background: #404040;
-    overflow: hidden;
+    background: #202020;
+    overflow-x: visible;
+    overflow-y: auto;
     position: relative;
+    min-width: fit-content;
 }
 
 #header {
@@ -69,13 +71,41 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 h1 {
-    font-size: 16pt;
+    font-size: 18px;
 }
 
 h2 {
-    font-size: 12pt;
+    font-size: 16px;
 }
 
 h3 {
-    font-size: 10pt;
+    font-size: 14px;
+}
+
+table, p {
+    font-size: 12px;
+}
+
+.ticker {
+    width: 100%;
+}
+.ticker thead tr td {
+    white-space: nowrap;
+}
+
+.ticker tr td {
+    width: 0;
+}
+
+.ticker tr td:nth-last-child(1),
+.ticker tr td:nth-last-child(2),
+.ticker tr td:nth-last-child(3) {
+    text-align: right;
+}
+
+.positive {
+    color: rgb(0, 255, 0);
+}
+.negative {
+    color: rgb(255, 128, 128);
 }
