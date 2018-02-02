@@ -7,6 +7,8 @@ import { Backend } from './effects';
 import * as Exchange from './stores';
 import * as Components from './components';
 
+//#region Accesory Functions
+
 /** 
  * Binds the different stores to the backend data
  * so that incoming data from the Bitfinex backend
@@ -58,8 +60,10 @@ function connectComponentsToStores(module: typeof Components) {
     return ConnectedApp;
 }
 
+//#endregion
+       
 /**
- * Launches the system.
+ * Ties everything together, launching the system.
  */
 async function launch() {
     const App = connectComponentsToStores(Components);
