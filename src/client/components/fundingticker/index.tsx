@@ -21,8 +21,8 @@ export class FundingTicker extends React.Component<Exchange.FundingTickerProps> 
         });
 
         return (
-            <div id='ticker'>
-                <h2>Ticker</h2>
+            <div id='fundingticker' className='widget'>
+                <h2>Funding Ticker</h2>
                 <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
                 <ul>{tableRows}</ul>
             </div>
