@@ -97,7 +97,9 @@ export namespace Stream {
      * @param handler A handler that receives new ticks.
      */
     export function subscribeFundingTicker(symbol: string, handler: (o:BF.FundingPairTick) => void) {
-        let channel = 'fticker';
+        if (symbol === undefined)
+            debugger;
+        let channel = 'ticker';
         symbol = symbol.toUpperCase();
         return subscribe(channel + ':' + symbol, {
             channel,
@@ -209,8 +211,7 @@ function errorHandler(msg: ErrorEvent | Event) {
 }
 
 type KeyGenerator =
-    ((r: BF.TradeTickerSubscription) => string) |
-    ((r: BF.FundingTickerSubscription) => string) |
+    ((r: BF.TickerSubscription) => string) |
     ((r: BF.TradeSubscription) => string) |
     ((r: BF.BookSubscription) => string) |
     ((r: BF.CandleSubscription) => string)
@@ -218,8 +219,7 @@ type KeyGenerator =
 const subscribedJumpTable: {
     [name: string]: KeyGenerator;
 } = {
-        ticker: (r: BF.TradeTickerSubscription) => r.channel + ':' + r.pair,
-        fticker: (r: BF.FundingTickerSubscription) => r.channel + ':' + r.symbol,
+        ticker: (r: BF.TickerSubscription) => (r.channel + ':' + (r.pair? r.pair : r.currency)) as string,
         trades: (r: BF.TradeSubscription) => r.channel + ':' + r.pair,
         book: (r: BF.BookSubscription) => r.channel + ':' + r.pair,
         candles: (r: BF.CandleSubscription) => r.channel + ':' + r.key
@@ -252,35 +252,37 @@ const eventJumpTable: {
 const channelJumpTable: {
     [name: string]: (r: any[]) => any;
 } = {
-        ticker: (r: any[]) : BF.TradingPairTick => {
-            return {
-                bid: r[0],
-                bidSize: r[1],
-                ask: r[2],
-                askSize: r[3],
-                dailyChange: r[4],
-                dailyChangePerc: r[5],
-                lastPrice: r[6],
-                volume: r[7],
-                high: r[8],
-                low: r[9]
+        ticker: (r: any[]) : BF.TradingPairTick | BF.FundingPairTick => {
+            if (r.length === 10) {
+                return {
+                    bid: r[0],
+                    bidSize: r[1],
+                    ask: r[2],
+                    askSize: r[3],
+                    dailyChange: r[4],
+                    dailyChangePerc: r[5],
+                    lastPrice: r[6],
+                    volume: r[7],
+                    high: r[8],
+                    low: r[9]
+                }    
             }
-        },
-        fticker: (r: any[]) : BF.FundingPairTick => {
-            return {
-                frr: r[0],
-                bid: r[1],
-                bidSize: r[2],
-                bidPeriod: r[3],
-                ask: r[4],
-                askSize: r[5],
-                askPeriod: r[6],
-                dailyChange: r[7],
-                dailyChangePerc: r[8],
-                lastPrice: r[9],
-                volume: r[10],
-                high: r[11],
-                low: r[12]
+            else {
+                return {
+                    frr: r[0],
+                    bid: r[1],
+                    bidSize: r[2],
+                    bidPeriod: r[3],
+                    ask: r[4],
+                    askSize: r[5],
+                    askPeriod: r[6],
+                    dailyChange: r[7],
+                    dailyChangePerc: r[8],
+                    lastPrice: r[9],
+                    volume: r[10],
+                    high: r[11],
+                    low: r[12]
+                }    
             }
         },
         trades: (r: any[]) => r,
