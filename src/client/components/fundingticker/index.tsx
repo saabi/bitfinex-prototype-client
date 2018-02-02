@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Exchange } from './store'
+import { Exchange } from '../../store';
 
-export class Ticker extends React.Component<Exchange.TickerProps> {
+export class FundingTicker extends React.Component<Exchange.FundingTickerProps> {
     render() {
         const store = this.props.store;
         const tickers = store.get('tickers');
@@ -25,26 +25,6 @@ export class Ticker extends React.Component<Exchange.TickerProps> {
                 <h2>Ticker</h2>
                 <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
                 <ul>{tableRows}</ul>
-            </div>
-        )
-    }
-}
-
-export class Book extends React.Component<Exchange.BookProps> {
-    render() {
-        return (
-            <div id='book'>
-                <h2>Order Book</h2>
-            </div>
-        )
-    }
-}
-
-export class Trades extends React.Component<Exchange.TradesProps> {
-    render() {
-        return (
-            <div id='trades'>
-                <h2>Trades</h2>
             </div>
         )
     }

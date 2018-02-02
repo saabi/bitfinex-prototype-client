@@ -7,31 +7,48 @@ type TickerOrder = 'symbol' | 'last' | '24hr' | 'volume';
 
 export namespace Exchange {
 
-    type TickerModel = {
+    type TradeTickerModel = {
         tickers: BF.Ticks;
         groups: { [name: string]: BF.SymbolDetail[] };
         orderColumn: TickerOrder;
         orderDirection: OrderDirection;
     }
-    export type TickerStore = UnduxStore<TickerModel>;
-    export const TickerStore = createStore<TickerModel>({
+    export type TradeTickerStore = UnduxStore<TradeTickerModel>;
+    export const TradeTickerStore = createStore<TradeTickerModel>({
         tickers: {},
         groups: {},
         orderColumn: 'symbol',
         orderDirection: 'unsorted'
     });
-    export type TickerProps = {
-        store: TickerStore;
+    export type TradeTickerProps = {
+        store: TradeTickerStore;
     }
 
-
-    type BookModel = {
+    type FundingTickerModel = {
+        tickers: BF.Ticks;
+        groups: { [name: string]: BF.SymbolDetail[] };
+        orderColumn: TickerOrder;
+        orderDirection: OrderDirection;
     }
-    export type BookStore = UnduxStore<BookModel>;
-    export const BookStore = createStore<BookModel>({
+    export type FundingTickerStore = UnduxStore<FundingTickerModel>;
+    export const FundingTickerStore = createStore<FundingTickerModel>({
+        tickers: {},
+        groups: {},
+        orderColumn: 'symbol',
+        orderDirection: 'unsorted'
     });
-    export type BookProps = {
-        store: BookStore;
+    export type FundingTickerProps = {
+        store: FundingTickerStore;
+    }
+
+
+    type OrderBookModel = {
+    }
+    export type OrderBookStore = UnduxStore<OrderBookModel>;
+    export const OrderBookStore = createStore<OrderBookModel>({
+    });
+    export type OrderBookProps = {
+        store: OrderBookStore;
     }
 
 
@@ -44,6 +61,14 @@ export namespace Exchange {
         store: TradesStore;
     }
 
+    type CandlesModel = {
+    }
+    export type CandlesStore = UnduxStore<TradesModel>;
+    export const CandlesStore = createStore<TradesModel>({
+    });
+    export type CandlesProps = {
+        store: CandlesStore;
+    }
 
     type AppModel = {
         currentSymbol: string;
