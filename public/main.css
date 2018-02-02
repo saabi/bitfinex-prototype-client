@@ -10,6 +10,8 @@ html, body, #app-root {
 
 html {
     background: #202020;
+    color: rgb(224, 224, 224);
+    font-family: sans-serif;
 }
 
 #app-root {
@@ -19,6 +21,10 @@ html {
         "sidebar1 content content"
         "sidebar2 underbar1 underbar2"
         "footer footer footer";
+    grid-template-columns: 200px auto auto;
+    grid-template-rows: 0fr auto auto 0fr;
+    justify-content: stretch;
+    align-content: stretch;
 }
 
 .widget {
@@ -55,4 +61,21 @@ html {
 
 #candles {
     grid-area: content;    
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+    padding: 0; 
+}
+
+h1 {
+    font-size: 16pt;
+}
+
+h2 {
+    font-size: 12pt;
+}
+
+h3 {
+    font-size: 10pt;
 }

@@ -22,7 +22,7 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
 
         return (
             <div id='tradesticker' className='widget'>
-                <h2>Ticker</h2>
+                <h3>Ticker</h3>
                 <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
                 <ul>{tableRows}</ul>
             </div>
