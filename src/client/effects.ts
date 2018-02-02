@@ -31,14 +31,14 @@ export namespace Backend {
             baseCoin.push(s);
         }
         //#endregion
-    
+
         tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
         //console.debug(tickers);
 
         Bitfinex.Stream.connect();
     }
     
-    export async function bindTickerStore(store: Exchange.TradeTickerStore) {
+    export async function bindTradeTickerStore(store: Exchange.TradeTickerStore) {
         let tickerStore = store;
 
         tickerStore.set('tickers')(tickers);
@@ -48,9 +48,43 @@ export namespace Backend {
 
         function subscribeToAllTickers() {
             console.debug('Subscribing to Tickers...');
-  
+
             symbols.forEach( s => {
-                let result = Bitfinex.Stream.subscribeTicker(s, t => {
+                let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
+
+                    tickers = replaceDictionary(tickers, s, t);
+                    tickerStore.set('tickers')(tickers);
+                });
+                subscriptions[result.key] = [result.handler];
+            });
+        }
+        function unsubscribeFromAllTickers() {
+            Object.getOwnPropertyNames(subscriptions).forEach( (n) => {
+                Bitfinex.Stream.unsubscribe(n, subscriptions[n][0]) 
+            });
+            subscriptions = {};
+        }
+        // Resubscribes to trading tickers after connection failure.
+        let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
+    }
+    const FundingSymbols = [
+        'EUR', 'USD', 'BTC', 'ETH', 'XRP', 'EOS', 'BCH', 'NEO', 'IOT', 'LTC', 
+        'OMG', 'ETC', 'XMR', 'DSH', 'ZEC', 'BTG', 'ETP', 'SAN', 'EDO'
+    ]
+    
+    export async function bindFundingTickerStore(store: Exchange.TradeTickerStore) {
+        let tickerStore = store;
+
+        let tickers = await Bitfinex.V2.getTickers(FundingSymbols.map(s => 'f' + s.toUpperCase()));
+        tickerStore.set('tickers')(tickers);
+
+        let subscriptions: BF.SubscriptionHandlerList = {};
+
+        function subscribeToAllTickers() {
+            console.debug('Subscribing to Tickers...');
+  
+            FundingSymbols.forEach( s => {
+                let result = Bitfinex.Stream.subscribeFundingTicker(s, t => {
 
                     tickers = replaceDictionary(tickers, s, t);
                     tickerStore.set('tickers')(tickers);
@@ -68,9 +102,11 @@ export namespace Backend {
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
     }
 
-    export async function bindBookStore(store: Exchange.OrderBookStore) {
+    export async function bindOrderBookStore(store: Exchange.OrderBookStore) {
     }
     export async function bindTradesStore(store: Exchange.TradesStore) {
+    }
+    export async function bindCandlesStore(store: Exchange.TradesStore) {
     }
     export async function bindAppStore(store: Exchange.AppStore) {
     }
