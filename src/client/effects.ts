@@ -8,9 +8,6 @@ let symbolsDetails: BF.SymbolDetail[];
 let baseCoinGroups: { [name: string]: BF.SymbolDetail[] };
 let tickers: BF.Ticks;
 
-function onBitfinexConnection() {
-}
-
 export namespace Backend {
 
     export async function init() {
@@ -67,6 +64,7 @@ export namespace Backend {
             });
             subscriptions = {};
         }
+        // Resubscribes to trading tickers after connection failure.
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
     }
 
