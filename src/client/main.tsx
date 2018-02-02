@@ -33,7 +33,7 @@ function bindStoresToBackend() {
  * 
  * @param module The module containing the React components.
  */
-function connectComponentsToStores(module:any) {
+function connectComponentsToStores(module: typeof Components) {
     let ConnectedTicker = connect (Exchange.TickerStore) ('tickers', 'groups') (module.Ticker);
     let ConnectedBook = connect (Exchange.BookStore) () (module.Book);
     let ConnectedTrades = connect (Exchange.TradesStore) () (module.Trades);
@@ -73,7 +73,7 @@ async function render(Component: React.ComponentClass<{}>) {
     ReactDOM.render(<AppContainer><Component /></AppContainer>, document.getElementById('app-root'));
 }
 async function loadAndRender() {
-    const reloadedComponents = require('./components');
+    const reloadedComponents = await import('./components');
     const NextApp = connectComponentsToStores( reloadedComponents );
     render(NextApp);
 }
