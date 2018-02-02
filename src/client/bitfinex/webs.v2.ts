@@ -180,9 +180,11 @@ var keyMap: { [id: number]: string } = {};
 Stream.addConnectionHandler(() => connected = true);
 
 function reconnect() {
-    if (!connected)
-        setTimeout(reconnect, 10000);
+    if (connected) 
+        return;
     Stream.connect();
+    // check if connection succesful in 10 seconds.
+    setTimeout(reconnect, 10000);
 }
 
 function connectionHandler(ev: Event): any {
