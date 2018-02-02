@@ -1,3 +1,5 @@
+export { Header } from './header';
+export { Footer } from './footer';
 export { TradeTicker } from './tradeticker';
 export { FundingTicker } from './fundingticker';
 export { OrderBook } from './orderbook';

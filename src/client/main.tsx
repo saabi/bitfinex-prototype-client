@@ -34,17 +34,23 @@ function bindStoresToBackend() {
  * @param module The module containing the React components.
  */
 function connectComponentsToStores(module: typeof Components) {
-    let ConnectedTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
+    let ConnectedTradesTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
+    let ConnectedFundingTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
     let ConnectedBook = connect (Exchange.OrderBookStore) () (module.OrderBook);
     let ConnectedTrades = connect (Exchange.TradesStore) () (module.Trades);
+    let ConnectedCandles = connect (Exchange.TradesStore) () (module.Candles);
 
     let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol') (class extends React.Component<Exchange.AppProps> {
         render() {
             return (
                 <>
-                <ConnectedTicker />
+                <Components.Header />
+                <ConnectedTradesTicker />
+                <ConnectedFundingTicker />
                 <ConnectedBook />
                 <ConnectedTrades />
+                <ConnectedCandles />
+                <Components.Footer />
                 </>)
         }
     });
