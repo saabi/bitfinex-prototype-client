@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Exchange } from '../../store';
+import * as Exchange from '../../stores';
 
 export class Candles extends React.Component<Exchange.CandlesProps> {
     render() {

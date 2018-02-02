@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import { connect } from 'undux';
 
 import { Backend } from './effects';
-import { Exchange } from './store';
+import * as Exchange from './stores';
 import * as Components from './components';
 
 /** 
@@ -19,8 +19,8 @@ import * as Components from './components';
  */
 function bindStoresToBackend() {
     Backend.bindAppStore(Exchange.AppStore);
-    Backend.bindTickerStore(Exchange.TickerStore);
-    Backend.bindBookStore(Exchange.BookStore);
+    Backend.bindTickerStore(Exchange.TradeTickerStore);
+    Backend.bindBookStore(Exchange.OrderBookStore);
     Backend.bindTradesStore(Exchange.TradesStore);
 }
 
@@ -34,8 +34,8 @@ function bindStoresToBackend() {
  * @param module The module containing the React components.
  */
 function connectComponentsToStores(module: typeof Components) {
-    let ConnectedTicker = connect (Exchange.TickerStore) ('tickers', 'groups') (module.Ticker);
-    let ConnectedBook = connect (Exchange.BookStore) () (module.Book);
+    let ConnectedTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
+    let ConnectedBook = connect (Exchange.OrderBookStore) () (module.OrderBook);
     let ConnectedTrades = connect (Exchange.TradesStore) () (module.Trades);
 
     let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol') (class extends React.Component<Exchange.AppProps> {
@@ -79,6 +79,6 @@ async function loadAndRender() {
 }
 
 if (module.hot) {
-    module.hot.accept(['./components.tsx'], loadAndRender);
+    module.hot.accept(['./components'], loadAndRender);
 }
 //#endregion

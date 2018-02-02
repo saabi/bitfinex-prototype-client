@@ -1,6 +1,6 @@
 import Bitfinex from './bitfinex';
 import * as BF from './bitfinex/types';
-import { Exchange } from './store';
+import * as Exchange from './stores';
 import { replaceDictionary } from './utils';
 
 let symbols: string[];
@@ -38,7 +38,7 @@ export namespace Backend {
         Bitfinex.Stream.connect();
     }
     
-    export async function bindTickerStore(store: Exchange.TickerStore) {
+    export async function bindTickerStore(store: Exchange.TradeTickerStore) {
         let tickerStore = store;
 
         tickerStore.set('tickers')(tickers);
@@ -68,7 +68,7 @@ export namespace Backend {
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
     }
 
-    export async function bindBookStore(store: Exchange.BookStore) {
+    export async function bindBookStore(store: Exchange.OrderBookStore) {
     }
     export async function bindTradesStore(store: Exchange.TradesStore) {
     }

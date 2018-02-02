@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Exchange } from '../../store';
+import * as Exchange from '../../stores';
 
 export class OrderBook extends React.Component<Exchange.OrderBookProps> {
     render() {
