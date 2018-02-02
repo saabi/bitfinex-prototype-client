@@ -97,8 +97,6 @@ export namespace Stream {
      * @param handler A handler that receives new ticks.
      */
     export function subscribeFundingTicker(symbol: string, handler: (o:BF.FundingPairTick) => void) {
-        if (symbol === undefined)
-            debugger;
         let channel = 'ticker';
         symbol = symbol.toUpperCase();
         return subscribe(channel + ':' + symbol, {
