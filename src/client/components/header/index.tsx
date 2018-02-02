@@ -4,7 +4,8 @@ export class Header extends React.Component<{}> {
     render() {
         return (
             <div id='header'>
-                <h2>Header</h2>
+                <h1>Bitfinex</h1>
+                <h2>Prototype Client</h2>
             </div>
         )
     }

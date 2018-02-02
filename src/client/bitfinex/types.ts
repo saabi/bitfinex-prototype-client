@@ -62,15 +62,11 @@ export interface Subscription extends BitfinexResponse {
     event: 'subscribed';
 }
 
-export interface TradeTickerSubscription extends Subscription {
+export interface TickerSubscription extends Subscription {
     channel: "ticker";
     symbol: string;
-    pair: string;
-}
-
-export interface FundingTickerSubscription extends Subscription {
-    channel: 'fticker';
-    symbol: string;
+    pair?: string;
+    currency?: string;
 }
 
 export interface TradeSubscription extends Subscription {

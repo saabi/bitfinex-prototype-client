@@ -4,7 +4,7 @@ export class Footer extends React.Component<{}> {
     render() {
         return (
             <div id='footer'>
-                <h2>Footer</h2>
+                <p>&copy; 2018 Sebastian Ferreyra Pons, all rights reserved.</p>
             </div>
         )
     }

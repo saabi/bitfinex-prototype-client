@@ -5,26 +5,35 @@ export class FundingTicker extends React.Component<Exchange.FundingTickerProps> 
     render() {
         const store = this.props.store;
         const tickers = store.get('tickers');
-        const groups = store.get('groups');
 
-        let groupNames = Object.getOwnPropertyNames(groups);
-        let tableRows = groupNames.map((symbol) => {
-            let group = groups[symbol];
+        let tableRows = Object.getOwnPropertyNames(tickers).map((symbol) => {
+            let i = tickers[symbol];
             return (
-                <li key={symbol}>
-                    <h1>{symbol}</h1>
-                    <ul>
-                        {group.map(i => (<li key={i.pair}><ul><li>{i.pair}</li><li>{tickers[i.pair].lastPrice}</li><li>{tickers[i.pair].dailyChange}</li><li>{tickers[i.pair].volume}</li></ul></li>))}
-                    </ul>
-                </li>
+                <tr key={symbol}>
+                    <td>{symbol}</td>
+                    <td>{(100*i.lastPrice).toFixed(6)}</td>
+                    <td className={i.dailyChangePerc>0?'positive':'negative'}>{(100*i.dailyChangePerc).toFixed(2)}%</td>
+                    <td>{Math.round(i.volume).toLocaleString()}</td>
+                </tr>
             )
         });
 
         return (
             <div id='fundingticker' className='widget'>
-                <h2>Funding Ticker</h2>
-                <ul><li>symbol<button>{}</button></li><li>last<button>{}</button></li><li>24hr<button>{}</button></li><li>Vol Self<button>{}</button></li></ul>
-                <ul>{tableRows}</ul>
+                <h3>Funding Ticker</h3>
+                <table className='ticker'>
+                    <thead>
+                        <tr>
+                            <td>symbol<button>{}</button></td>
+                            <td>last<button>{}</button></td>
+                            <td>24hr<button>{}</button></td>
+                            <td>Vol Self<button>{}</button></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tableRows}
+                    </tbody>
+                </table>
             </div>
         )
     }

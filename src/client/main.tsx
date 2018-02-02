@@ -21,9 +21,11 @@ import * as Components from './components';
  */
 function bindStoresToBackend() {
     Backend.bindAppStore(Exchange.AppStore);
-    Backend.bindTickerStore(Exchange.TradeTickerStore);
-    Backend.bindBookStore(Exchange.OrderBookStore);
+    Backend.bindTradeTickerStore(Exchange.TradeTickerStore);
+    Backend.bindFundingTickerStore(Exchange.FundingTickerStore);
+    Backend.bindOrderBookStore(Exchange.OrderBookStore);
     Backend.bindTradesStore(Exchange.TradesStore);
+    Backend.bindCandlesStore(Exchange.CandlesStore);
 }
 
 /**
@@ -37,7 +39,7 @@ function bindStoresToBackend() {
  */
 function connectComponentsToStores(module: typeof Components) {
     let ConnectedTradesTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
-    let ConnectedFundingTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
+    let ConnectedFundingTicker = connect (Exchange.FundingTickerStore) ('tickers', 'groups') (module.FundingTicker);
     let ConnectedBook = connect (Exchange.OrderBookStore) () (module.OrderBook);
     let ConnectedTrades = connect (Exchange.TradesStore) () (module.Trades);
     let ConnectedCandles = connect (Exchange.TradesStore) () (module.Candles);
