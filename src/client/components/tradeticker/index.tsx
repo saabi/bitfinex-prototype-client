@@ -19,7 +19,7 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
                         return (
                             <tr key={gi.pair}>
                                 {(c===1) ? <td rowSpan={group.length}>{symbol}</td> : null}
-                                <td>{(i.lastPrice).toLocaleString()} {gi.pair.substr(3,3)}</td>
+                                <td>{(i.lastPrice).toLocaleString()}&nbsp;{gi.pair.substr(3,3)}</td>
                                 <td className={i.dailyChangePerc>0?'positive':'negative'}>{(100*i.dailyChangePerc).toFixed(2)}%</td>
                                 <td>{Math.round(i.volume).toLocaleString()}</td>
                             </tr>)}
