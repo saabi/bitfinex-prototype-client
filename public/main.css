@@ -1,0 +1,58 @@
+html, body, #app-root {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+html {
+    background: #202020;
+}
+
+#app-root {
+    display: grid;
+    grid-template-areas: 
+        "header header header"
+        "sidebar1 content content"
+        "sidebar2 underbar1 underbar2"
+        "footer footer footer";
+}
+
+.widget {
+    margin: 2px;
+    border-radius: 2px;
+    padding: 2px;
+    background: #404040;
+    overflow: hidden;
+    position: relative;
+}
+
+#header {
+    grid-area: header;
+}
+
+#footer {
+    grid-area: footer;
+}
+
+#tradeticker {
+    grid-area: sidebar1;
+}
+#fundingticker {
+    grid-area: sidebar2;
+}
+
+#orderbook {
+    grid-area: underbar1;    
+}
+
+#trades {
+    grid-area: underbar2;    
+}
+
+#candles {
+    grid-area: content;    
+}
