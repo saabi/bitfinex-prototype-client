@@ -1,7 +1,7 @@
 import Bitfinex from './bitfinex';
 import * as BF from './bitfinex/types';
 import * as Exchange from './stores';
-import { replaceDictionary } from './utils';
+import { replaceDictionary, replaceManyDictionary } from './utils';
 import { SubscriptionHandler, BookTick } from './bitfinex/types';
 
 let symbols: string[];
@@ -139,8 +139,33 @@ export namespace Backend {
         });
     }
     export async function bindTradesStore(store: Exchange.TradesStore) {
+        let symbol: string | null = store.get('symbol');
+        let trades: BF.TradeTick[] = [];
+        let result: {key: string; handler: BF.SubscriptionHandler} | null = null;
+
+        let handler: (ts:BF.TradeTick[]) => void = ts => {
+            let newTrades = trades.slice();
+            newTrades.unshift(...ts);
+            trades = newTrades;
+            store.set('trades')(trades);
+        }
+
+        const subscribe = (s:string) => Bitfinex.Stream.subscribeTrades(s, handler );
+        if (symbol) subscribe(symbol);
+
+        store.on('symbol').subscribe((newSymbol:string | null) => {
+            if (newSymbol && newSymbol !== symbol) {
+                if (result) {
+                    Bitfinex.Stream.unsubscribe(result.key, result.handler);
+                    trades = [];
+                    store.set('trades')(trades);
+                }
+                result = subscribe(newSymbol);
+                symbol = newSymbol;
+            }
+        });
     }
-    export async function bindCandlesStore(store: Exchange.TradesStore) {
+    export async function bindCandlesStore(store: Exchange.CandlesStore) {
     }
     export async function bindAppStore(store: Exchange.AppStore) {
         Bitfinex.Stream.addConnectionHandler(() => {
