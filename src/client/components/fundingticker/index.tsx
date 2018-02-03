@@ -17,7 +17,7 @@ class FundingTickerRow extends React.Component<RowProps> {
         let tick = this.props.tick;
         let symbol = this.props.symbol;
         return (
-            <tr key={symbol}>
+            <tr>
                 <td>{symbol}</td>
                 <td>{(100*tick.lastPrice).toFixed(6)}</td>
                 <td className={tick.dailyChangePerc>0?'positive':'negative'}>{(100*tick.dailyChangePerc).toFixed(2)}%</td>
@@ -49,7 +49,7 @@ export class FundingTicker extends React.Component<Exchange.FundingTickerProps> 
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.getOwnPropertyNames(tickers).map(symbol => <FundingTickerRow symbol={symbol} tick={tickers[symbol] as FundingPairTick} />)}
+                        {Object.getOwnPropertyNames(tickers).map(symbol => <FundingTickerRow key={symbol} symbol={symbol} tick={tickers[symbol] as FundingPairTick} />)}
                     </tbody>
                 </table>
             </div>

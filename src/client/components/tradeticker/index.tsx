@@ -14,11 +14,10 @@ interface RowProps {
     first: boolean;
     selected: boolean;
     groupLength: number;
-    //detail: SymbolDetail;
     symbol: string;
     pair: string;
     tick: TradingPairTick;
-    store: TradeTickerStore;
+    onClick: () => void ;
 }
 class TradeTickerRow extends React.Component<RowProps> {
 
@@ -27,20 +26,16 @@ class TradeTickerRow extends React.Component<RowProps> {
     }
 
     render() {
-        const pair = this.props.pair;
-        const tick = this.props.tick;
-        const store = this.props.store;
-        const selected = this.props.selected;
-        const first = this.props.first;
-        const gLength = this.props.groupLength;
-        const symbol = this.props.symbol;
+        const props = this.props;
+        const tick = props.tick;
         let lpF = (tick.lastPrice).toFixed(6);
         let lpP = (tick.lastPrice).toPrecision(6);
+        const dailyChangePerc = tick.dailyChangePerc;
         return (
-            <tr onClick={() => store.set('selectedSymbol')(pair)} className={selected?'selected':''}>
-                {first ? <td rowSpan={gLength}>{symbol}</td> : null}
-                <td>{lpF.length < lpP.length ? lpF : lpP}&nbsp;{pair.substr(3,3)}</td>
-                <td className={tick.dailyChangePerc>0?'positive':'negative'}>{(100*tick.dailyChangePerc).toFixed(2)}%</td>
+            <tr className={props.selected?'selected':''}>
+                {props.first ? <td rowSpan={props.groupLength}>{props.symbol}</td> : null}
+                <td>{lpF.length < lpP.length ? lpF : lpP}&nbsp;{props.pair.substr(3,3)}</td>
+                <td className={dailyChangePerc>0?'positive':'negative'}>{(100*dailyChangePerc).toFixed(2)}%</td>
                 <td>{Math.round(tick.volume).toLocaleString()}</td>
             </tr>
         )
@@ -52,22 +47,21 @@ interface GroupProps {
     group: SymbolDetail[];
     tickers: Ticks;
     store: TradeTickerStore;
+    selectedSymbol: string;
 }
 class TradeTickerRowGroup extends React.Component<GroupProps> {
     render() {
-        const symbol = this.props.symbol;
-        const group = this.props.group;
-        const tickers = this.props.tickers;
-        const store = this.props.store;
-        const sel = this.props.store.get('selectedSymbol');
+        const props = this.props;
+        const group = props.group;
         let c = 0;
         return (
-            <tbody key={symbol}>
+            <tbody>
                 {group.map(gi => {
                     c++;
-                    let i = tickers[gi.pair] as TradingPairTick;
+                    const pair = gi.pair;
+                    let tick = props.tickers[gi.pair] as TradingPairTick;
                     return (
-                        <TradeTickerRow key={gi.pair} symbol={symbol} pair={gi.pair} first={c===1} selected={sel===gi.pair} tick={i} store={store} groupLength={group.length}/>
+                        <TradeTickerRow key={pair} tick={tick} symbol={props.symbol} onClick={() => props.store.set('selectedSymbol')(pair)} pair={pair} first={c===1} selected={props.selectedSymbol===pair} groupLength={group.length}/>
                     )}
                 )}
             </tbody>
@@ -89,6 +83,7 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps, Stat
         const store = this.props.store;
         const tickers = store.get('tickers');
         const groups = store.get('groups');
+        const selectedSymbol = store.get('selectedSymbol');
 
         let groupNames = Object.getOwnPropertyNames(groups);
 
@@ -104,7 +99,7 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps, Stat
                             <td>volume<OrderButton id='volume' onDirection={handleSorting} /></td>
                         </tr>
                     </thead>
-                    {groupNames.map(symbol => <TradeTickerRowGroup group={groups[symbol]} symbol={symbol} tickers={tickers} store={store} />)}
+                    {groupNames.map(symbol => <TradeTickerRowGroup key={symbol} group={groups[symbol]} symbol={symbol} tickers={tickers} store={store} selectedSymbol={selectedSymbol as string} />)}
                 </table>
             </div>
         )
