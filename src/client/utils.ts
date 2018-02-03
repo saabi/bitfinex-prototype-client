@@ -15,3 +15,9 @@ export function replaceDictionary<T>(object: {[name:string]:T}, key: string, rep
     newObject[key] = replacement
     return newObject;
 }
+
+export function replaceManyDictionary<T>(object: {[name:string]:T}, keyer: (t:T) => string, replacements: T[]): {[name:string]:T} {
+    let newObject = Object.assign({}, object);
+    replacements.forEach( t => newObject[keyer(t)] = t);
+    return newObject;
+}
