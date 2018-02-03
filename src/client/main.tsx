@@ -21,7 +21,7 @@ import * as Components from './components';
 function connectComponentsToStores(module: typeof Components) {
     let ConnectedTradesTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups', 'selectedSymbol') (module.TradeTicker);
     let ConnectedFundingTicker = connect (Exchange.FundingTickerStore) ('tickers') (module.FundingTicker);
-    let ConnectedBook = connect (Exchange.OrderBookStore) ('symbol') (module.OrderBook);
+    let ConnectedBook = connect (Exchange.OrderBookStore) ('symbol','book') (module.OrderBook);
     let ConnectedTrades = connect (Exchange.TradesStore) ('symbol') (module.Trades);
     let ConnectedCandles = connect (Exchange.CandlesStore) ('symbol') (module.Candles);
 
