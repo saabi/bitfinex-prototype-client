@@ -22,7 +22,7 @@ interface RowProps {
 class TradeTickerRow extends React.Component<RowProps> {
 
     shouldComponentUpdate(nextProps: RowProps) {
-        return nextProps.tick !== this.props.tick;
+        return nextProps.tick !== this.props.tick || this.props.selected !== nextProps.selected;
     }
 
     render() {
