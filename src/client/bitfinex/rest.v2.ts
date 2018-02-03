@@ -1,22 +1,15 @@
 import * as BF from './types';
+import { getJSON } from './util';
 
 export namespace V2 {
 
     const apiUrl = 'https://api.bitfinex.com/v2/';
 
-    async function getJSON<T>(path: string): Promise<T> {
-        let r = await fetch(apiUrl + path);
-        let json = await r.json();
-        if (json.error || r.status !== 200)
-            throw json;
-        return json as T;
-    }
-
     /**
      * Returns the Bitfinex API server status.
      */
     export async function getStatus(): Promise<BF.Status> {
-        let response = await getJSON<[number]>('platform/status');
+        let response = await getJSON<[number]>(apiUrl + 'platform/status');
         return response[0] === 1 ? 'operative' : 'maintenance';
     }
 
@@ -24,7 +17,7 @@ export namespace V2 {
      * Returns a high level view of requested tickers.
      */
     export async function getTickers(tickerList: string[]): Promise<BF.Ticks> {
-        let response = await getJSON<any[][]>('tickers?symbols=' + tickerList.join(','));
+        let response = await getJSON<any[][]>(apiUrl + 'tickers?symbols=' + tickerList.join(','));
         let tickers: BF.Ticks = {};
         response.forEach((ticker) => {
             let symbol = (<string>ticker[0]).substr(1,6).toUpperCase();

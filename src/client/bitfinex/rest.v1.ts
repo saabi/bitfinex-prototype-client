@@ -1,21 +1,15 @@
 import * as BF from './types';
+import { getJSON } from './util';
 
 export namespace V1 {
     const apiUrl = '/v1/';  // The web service proxy URL
 
-    async function getJSON<T>(path: string): Promise<T> {
-        let r = await fetch(apiUrl + path);
-        let json = await r.json();
-        if (json.error || r.status !== 200)
-            throw json;
-        return json as T;
-    }
 
     /**
      * Gets the list of symbols from the Bitfinex API server.
      */
     export async function getSymbols() {
-        let result = await getJSON<string[]>('symbols');
+        let result = await getJSON<string[]>(apiUrl + 'symbols');
         for (let i = 0; i < result.length; i++) 
             result[i] = result[i].toUpperCase();
         return result;
@@ -25,7 +19,7 @@ export namespace V1 {
      * Gets the list of symbols with details from the Bitfinex API server.
      */
     export async function getSymbolsDetails() {
-        let result = await getJSON<BF.SymbolDetail[]>('symbols_details');
+        let result = await getJSON<BF.SymbolDetail[]>(apiUrl + 'symbols_details');
         for (let i = 0; i < result.length; i++) 
             result[i].pair = result[i].pair.toUpperCase();
         return result;
