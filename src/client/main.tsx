@@ -9,6 +9,57 @@ import * as Components from './components';
 
 //#region Accesory Functions
 
+/**
+ * Connects the react components to the stores so that changes 
+ * in the stores update the components and vice versa.
+ * 
+ * This is done in here so as to support hot module replacement
+ * with Unduxed React components while developing.
+ * 
+ * @param module The module containing the React components.
+ */
+function connectComponentsToStores(module: typeof Components) {
+    let ConnectedTradesTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups', 'selectedSymbol') (module.TradeTicker);
+    let ConnectedFundingTicker = connect (Exchange.FundingTickerStore) ('tickers') (module.FundingTicker);
+    let ConnectedBook = connect (Exchange.OrderBookStore) ('symbol') (module.OrderBook);
+    let ConnectedTrades = connect (Exchange.TradesStore) ('symbol') (module.Trades);
+    let ConnectedCandles = connect (Exchange.CandlesStore) ('symbol') (module.Candles);
+
+    let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol','isConnected') (class extends React.Component<Exchange.AppProps> {
+        render() {
+            let store = this.props.store;
+            return (
+                <>
+                <Components.Header currentSymbol={store.get('currentSymbol')} isConnected={store.get('isConnected')}/>
+                <ConnectedTradesTicker />
+                <ConnectedFundingTicker />
+                <ConnectedBook />
+                <ConnectedTrades />
+                <ConnectedCandles />
+                <Components.Footer />
+                </>)
+        }
+    });
+
+    return ConnectedApp;
+}
+
+/**
+ * Binds state changes between different stores.
+ */
+function bindStoresToStores() {
+    Exchange.TradeTickerStore.on('selectedSymbol')
+        .subscribe( symbol => 
+            Exchange.AppStore.set('currentSymbol')(symbol) 
+        );
+    Exchange.AppStore.on('currentSymbol')
+        .subscribe( symbol => {
+            Exchange.OrderBookStore.set('symbol')(symbol);
+            Exchange.TradesStore.set('symbol')(symbol);
+            Exchange.CandlesStore.set('symbol')(symbol);
+        });    
+}
+
 /** 
  * Binds the different stores to the backend data
  * so that incoming data from the Bitfinex backend
@@ -28,46 +79,14 @@ function bindStoresToBackend() {
     Backend.bindCandlesStore(Exchange.CandlesStore);
 }
 
-/**
- * Connects the react components to the stores so that changes 
- * in the stores update the components and vice versa.
- * 
- * This is done in here so as to support hot module replacement
- * with Unduxed React components while developing.
- * 
- * @param module The module containing the React components.
- */
-function connectComponentsToStores(module: typeof Components) {
-    let ConnectedTradesTicker = connect (Exchange.TradeTickerStore) ('tickers', 'groups') (module.TradeTicker);
-    let ConnectedFundingTicker = connect (Exchange.FundingTickerStore) ('tickers', 'groups') (module.FundingTicker);
-    let ConnectedBook = connect (Exchange.OrderBookStore) () (module.OrderBook);
-    let ConnectedTrades = connect (Exchange.TradesStore) () (module.Trades);
-    let ConnectedCandles = connect (Exchange.TradesStore) () (module.Candles);
-
-    let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol') (class extends React.Component<Exchange.AppProps> {
-        render() {
-            return (
-                <>
-                <Components.Header />
-                <ConnectedTradesTicker />
-                <ConnectedFundingTicker />
-                <ConnectedBook />
-                <ConnectedTrades />
-                <ConnectedCandles />
-                <Components.Footer />
-                </>)
-        }
-    });
-
-    return ConnectedApp;
-}
-
 //#endregion
        
 /**
  * Ties everything together, launching the system.
  */
 async function launch() {
+    bindStoresToStores();
+
     const App = connectComponentsToStores(Components);
     render(App);
 
