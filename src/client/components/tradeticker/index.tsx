@@ -17,7 +17,7 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
                         c++;
                         let i = tickers[gi.pair];
                         return (
-                            <tr key={gi.pair}>
+                            <tr key={gi.pair} onClick={() => store.set('selectedSymbol')(gi.pair)} className={store.get('selectedSymbol')===gi.pair?'selected':''}>
                                 {(c===1) ? <td rowSpan={group.length}>{symbol}</td> : null}
                                 <td>{(i.lastPrice).toLocaleString()}&nbsp;{gi.pair.substr(3,3)}</td>
                                 <td className={i.dailyChangePerc>0?'positive':'negative'}>{(100*i.dailyChangePerc).toFixed(2)}%</td>
