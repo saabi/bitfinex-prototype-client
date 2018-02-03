@@ -21,7 +21,7 @@ html {
         "sidebar1 content content"
         "sidebar2 underbar1 underbar2"
         "footer footer footer";
-    grid-template-columns: auto auto auto;
+    grid-template-columns: min-content auto auto;
     grid-template-rows: 0fr auto auto 0fr;
     justify-content: stretch;
     align-content: stretch;
@@ -40,6 +40,20 @@ html {
 
 #header {
     grid-area: header;
+    position: relative;
+}
+#currentSymbol {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+#connectionStatus {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-right: 4px;
 }
 
 #footer {
@@ -101,6 +115,12 @@ table, p {
 .ticker tr td:nth-last-child(2),
 .ticker tr td:nth-last-child(3) {
     text-align: right;
+}
+
+.ticker .selected td:nth-last-child(1),
+.ticker .selected td:nth-last-child(2),
+.ticker .selected td:nth-last-child(3) {
+    background: black;
 }
 
 .positive {
