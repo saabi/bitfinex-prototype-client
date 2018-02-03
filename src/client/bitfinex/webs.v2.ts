@@ -27,6 +27,21 @@ export namespace Stream {
     }
 
     /**
+     * Adds a handler that will be called everytime the connection is closed.
+     * @param handler The handler.
+     */
+    export function addDisconnectionHandler(handler: (wasClean:boolean) => void) {
+        disconnectionHandlers.push(handler);
+    }
+    /**
+     * Removes a handler.
+     * @param handler The handler.
+     */
+    export function removeDisconnectionHandler(handler: (wasClean:boolean) => void) {
+        disconnectionHandlers = connectionHandlers.filter((h) => h !== handler);
+    }
+
+    /**
      * Connects to the Bitfinex v2 API server.
      */
     export function connect() {
@@ -172,6 +187,7 @@ export namespace Stream {
 
 var wSocket: WebSocket;
 var connectionHandlers: (() => void)[] = [];
+var disconnectionHandlers: ((wasClean:boolean) => void)[] = [];
 var connected = false;
 var subscriptions: BF.SubscriptionHandlerList = {};
 var idMap: { [key: string]: number } = {};
@@ -195,9 +211,10 @@ function connectionHandler(ev: Event): any {
 
 function disconnectionHandler(ev: CloseEvent) {
     connected = false;
+    disconnectionHandlers.forEach((handler) => handler(ev.wasClean));
     if (ev.wasClean) {
         console.log('Bitfinex connection closed.');
-        //console.debug(ev);
+        console.debug(ev);
     }
     else {
         console.error('Bitfinex connection closed unexcpectedly.');
