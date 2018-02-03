@@ -1,8 +1,12 @@
 import * as React from 'react';
 import * as Exchange from '../../stores';
+import { OrderButton } from '../order-button';
+import { TickerOrder, OrderDirection } from '../../stores/types';
 
 export class FundingTicker extends React.Component<Exchange.FundingTickerProps> {
     render() {
+        const handleSorting = (id: string, direction: OrderDirection) => {
+        }
         const store = this.props.store;
         const tickers = store.get('tickers');
 
@@ -24,10 +28,10 @@ export class FundingTicker extends React.Component<Exchange.FundingTickerProps> 
                 <table className='ticker'>
                     <thead>
                         <tr>
-                            <td>symbol<button>{}</button></td>
-                            <td>last<button>{}</button></td>
-                            <td>24hr<button>{}</button></td>
-                            <td>Vol Self<button>{}</button></td>
+                            <td>symbol<OrderButton id='symbol' onDirection={handleSorting} /></td>
+                            <td>last<OrderButton id='last' onDirection={handleSorting} /></td>
+                            <td>24hr<OrderButton id='24hr' onDirection={handleSorting} /></td>
+                            <td>volume<OrderButton id='volume' onDirection={handleSorting} /></td>
                         </tr>
                     </thead>
                     <tbody>

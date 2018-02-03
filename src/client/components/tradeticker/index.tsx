@@ -1,8 +1,24 @@
 import * as React from 'react';
 import * as Exchange from '../../stores';
+import { OrderButton } from '../order-button';
+import { TickerOrder, OrderDirection } from '../../stores/types';
 
-export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
+interface State {
+    direction: OrderDirection;
+    column: TickerOrder;
+}
+
+export class TradeTicker extends React.Component<Exchange.TradeTickerProps, State> {
+    constructor(props:Exchange.TradeTickerProps) {
+        super(props);
+        this.state = {
+            direction: OrderDirection.unsorted,
+            column: 'symbol'
+        }
+    }
     render() {
+        const handleSorting = (id: string, direction: OrderDirection) => {
+        }
         const store = this.props.store;
         const tickers = store.get('tickers');
         const groups = store.get('groups');
@@ -36,10 +52,10 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
                 <table className='ticker'>
                     <thead>
                         <tr>
-                            <td>symbol<button>{}</button></td>
-                            <td>last<button>{}</button></td>
-                            <td>24hr<button>{}</button></td>
-                            <td>Vol Self<button>{}</button></td>
+                            <td>symbol<OrderButton id='symbol' onDirection={handleSorting} /></td>
+                            <td>last<OrderButton id='last' onDirection={handleSorting} /></td>
+                            <td>24hr<OrderButton id='24hr' onDirection={handleSorting} /></td>
+                            <td>volume<OrderButton id='volume' onDirection={handleSorting} /></td>
                         </tr>
                     </thead>
                     {tableRows}

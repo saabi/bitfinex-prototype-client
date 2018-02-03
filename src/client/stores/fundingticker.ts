@@ -6,16 +6,12 @@ import { Ticks, SymbolDetail } from '../bitfinex/types';
 
 type FundingTickerModel = {
     tickers: Ticks;
-    orderColumn: TickerOrder;
-    orderDirection: OrderDirection;
 }
 
 export type FundingTickerStore = UnduxStore<FundingTickerModel>;
 
 export const FundingTickerStore = createStore<FundingTickerModel>({
-    tickers: {},
-    orderColumn: 'symbol',
-    orderDirection: 'unsorted'
+    tickers: {}
 });
 
 export type FundingTickerProps = {
