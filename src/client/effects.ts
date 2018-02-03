@@ -2,6 +2,7 @@ import Bitfinex from './bitfinex';
 import * as BF from './bitfinex/types';
 import * as Exchange from './stores';
 import { replaceDictionary } from './utils';
+import { SubscriptionHandler, BookTick } from './bitfinex/types';
 
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
@@ -103,6 +104,39 @@ export namespace Backend {
     }
 
     export async function bindOrderBookStore(store: Exchange.OrderBookStore) {
+        let symbol: string | null = store.get('symbol');
+        let book: {[price:string]: BF.BookTick} = {};
+        let result: {key: string; handler: BF.SubscriptionHandler} | null = null;
+
+        let handler: (ts:BF.BookTick[]) => void = ts => {
+            let newBook = Object.assign({}, book);
+            ts.forEach( t => {
+                let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
+                if (t.count > 0) {
+                    newBook[key] = t;
+                }
+                else {
+                    delete newBook[key];
+                }
+            });
+            book = newBook;
+            store.set('book')(book);
+        }
+
+        const subscribe = (s:string) => Bitfinex.Stream.subscribeBook(s, 'P1', 'F0', '25', handler );
+        if (symbol) subscribe(symbol);
+
+        store.on('symbol').subscribe((newSymbol:string | null) => {
+            if (newSymbol && newSymbol !== symbol) {
+                if (result) {
+                    Bitfinex.Stream.unsubscribe(result.key, result.handler);
+                    book = {};
+                    store.set('book')(book);
+                }
+                result = subscribe(newSymbol);
+                symbol = newSymbol;
+            }
+        });
     }
     export async function bindTradesStore(store: Exchange.TradesStore) {
     }
