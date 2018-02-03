@@ -125,7 +125,7 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeTrades(symbol: string, handler: (o:BF.TradeTick) => void) {
+    export function subscribeTrades(symbol: string, handler: (o:BF.TradeTick[]) => void) {
         let channel = 'trades';
         symbol = symbol.toUpperCase();
         return subscribe(channel + ':' + symbol, {
@@ -303,7 +303,27 @@ const channelJumpTable: {
                 }    
             }
         },
-        trades: (r: any[]) => r,
+        trades: (r: any[]) : BF.TradeTick[] => {
+            console.log(r);
+            if (Array.isArray(r[0])) {
+                let a = r as [number,number,number,number][];
+                return a.map( (i:[number,number,number,number]) => {
+                    return {
+                        id: i[0],
+                        mts: i[1],
+                        amount: i[2],
+                        price: i[3]
+                    };
+                })
+            } else {
+                return [{
+                    id: r[0],
+                    mts: r[1],
+                    amount: r[2],
+                    price: r[3]
+            }]
+            }
+        },
         book: (r: any[] | any[][]) : BF.BookTick[] => {
             if (Array.isArray(r[0])) {
                 let a = r as [number,number,number][];
@@ -321,7 +341,7 @@ const channelJumpTable: {
                     amount: r[2]
                 }]
             }
-    },
+        },
         candles: (r: any[]) => r
     };
 
@@ -330,6 +350,10 @@ function messageHandler(msg: MessageEvent) {
     if (Array.isArray(json)) {
         let chanId = json[0];
         let payload = json[1];
+        if (payload === 'te')
+            return;
+        if (payload === 'tu')
+            payload = json[2]
         if (Array.isArray(payload)) {
             let key = keyMap[chanId];
             let sub = subscriptions[key];

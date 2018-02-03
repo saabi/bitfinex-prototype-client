@@ -120,7 +120,7 @@ export interface CandleSubscription extends Subscription {
 export type SubscriptionHandler =
     ((r: TradingPairTick) => void) |
     ((r: FundingPairTick) => void) |
-    ((r: TradeTick) => void) |
+    ((r: TradeTick[]) => void) |
     ((r: BookTick[]) => void) |
     ((r: CandleTick) => void);
 
