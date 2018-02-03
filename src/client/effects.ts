@@ -72,7 +72,7 @@ export namespace Backend {
         'OMG', 'ETC', 'XMR', 'DSH', 'ZEC', 'BTG', 'ETP', 'SAN', 'EDO'
     ]
     
-    export async function bindFundingTickerStore(store: Exchange.TradeTickerStore) {
+    export async function bindFundingTickerStore(store: Exchange.FundingTickerStore) {
         let tickerStore = store;
 
         let tickers = await Bitfinex.V2.getTickers(FundingSymbols.map(s => 'f' + s.toUpperCase()));
@@ -109,5 +109,11 @@ export namespace Backend {
     export async function bindCandlesStore(store: Exchange.TradesStore) {
     }
     export async function bindAppStore(store: Exchange.AppStore) {
+        Bitfinex.Stream.addConnectionHandler(() => {
+            store.set('isConnected')(true);
+        });
+        Bitfinex.Stream.addDisconnectionHandler((wasClean:boolean) => {
+            store.set('isConnected')(false);
+        });
     }
 }

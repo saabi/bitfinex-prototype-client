@@ -2,13 +2,15 @@ import { createStore, Store as UnduxStore } from 'undux';
 
 
 type AppModel = {
-    currentSymbol: string;
+    isConnected: boolean;
+    currentSymbol: string | null;
 }
 
 export type AppStore = UnduxStore<AppModel>;
 
 export const AppStore = createStore<AppModel>({
-    currentSymbol: 'BTCUSD'
+    isConnected: false,
+    currentSymbol: null
 });
 
 export type AppProps = {
