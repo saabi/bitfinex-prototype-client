@@ -16,10 +16,12 @@ export class TradeTicker extends React.Component<Exchange.TradeTickerProps> {
                     {group.map(gi => {
                         c++;
                         let i = tickers[gi.pair];
+                        let lpF = (i.lastPrice).toFixed(6);
+                        let lpP = (i.lastPrice).toPrecision(6);
                         return (
                             <tr key={gi.pair} onClick={() => store.set('selectedSymbol')(gi.pair)} className={store.get('selectedSymbol')===gi.pair?'selected':''}>
                                 {(c===1) ? <td rowSpan={group.length}>{symbol}</td> : null}
-                                <td>{(i.lastPrice).toLocaleString()}&nbsp;{gi.pair.substr(3,3)}</td>
+                                <td>{lpF.length < lpP.length ? lpF : lpP}&nbsp;{gi.pair.substr(3,3)}</td>
                                 <td className={i.dailyChangePerc>0?'positive':'negative'}>{(100*i.dailyChangePerc).toFixed(2)}%</td>
                                 <td>{Math.round(i.volume).toLocaleString()}</td>
                             </tr>)}
