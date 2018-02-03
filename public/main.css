@@ -154,3 +154,14 @@ table, p {
 #orderbook table thead td {
     background: none !important;
 }
+
+#trades table {
+    width: 100%;
+    text-align: right;
+}
+#trades .bought {
+    background: #352;
+}
+#trades .sold {
+    background: #422;
+}
