@@ -106,13 +106,33 @@ table, p {
 
 .ticker {
     width: 100%;
+
 }
 .ticker thead tr td {
     white-space: nowrap;
+    text-transform: uppercase;
+    color: gray;
+}
+.ticker thead tr td button {
+    width: 10px;
+    height: 10px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    line-height: 11px;
+    font-size: 14px;
+    overflow: hidden;
+    color: white;
+    background: #606060;
+    border-radius: 5px;
 }
 
 .ticker tr td {
     width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-collapse: collapse;
 }
 
 .ticker tr td:nth-last-child(1),
