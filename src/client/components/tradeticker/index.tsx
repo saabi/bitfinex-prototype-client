@@ -32,7 +32,7 @@ class TradeTickerRow extends React.Component<RowProps> {
         let lpP = (tick.lastPrice).toPrecision(6);
         const dailyChangePerc = tick.dailyChangePerc;
         return (
-            <tr className={props.selected?'selected':''}>
+            <tr className={props.selected?'selected':''} onClick={props.onClick}>
                 {props.first ? <td rowSpan={props.groupLength}>{props.symbol}</td> : null}
                 <td>{lpF.length < lpP.length ? lpF : lpP}&nbsp;{props.pair.substr(3,3)}</td>
                 <td className={dailyChangePerc>0?'positive':'negative'}>{(100*dailyChangePerc).toFixed(2)}%</td>
@@ -61,7 +61,7 @@ class TradeTickerRowGroup extends React.Component<GroupProps> {
                     const pair = gi.pair;
                     let tick = props.tickers[gi.pair] as TradingPairTick;
                     return (
-                        <TradeTickerRow key={pair} tick={tick} symbol={props.symbol} onClick={() => props.store.set('selectedSymbol')(pair)} pair={pair} first={c===1} selected={props.selectedSymbol===pair} groupLength={group.length}/>
+                        <TradeTickerRow key={pair} tick={tick} symbol={props.symbol} pair={pair} onClick={() => props.store.set('selectedSymbol')(pair)} first={c===1} selected={props.selectedSymbol===pair} groupLength={group.length}/>
                     )}
                 )}
             </tbody>
