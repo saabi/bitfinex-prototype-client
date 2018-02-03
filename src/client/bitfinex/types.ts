@@ -1,6 +1,10 @@
 export type Status = 'operative' | 'maintenance';
 
-export type Precision = 'PO' | 'P1' | 'P2' | 'P3';
+export type Precision = 'P0' | 'P1' | 'P2' | 'P3';
+
+export type Frequency = 'F0' | 'F1';
+
+export type Length = '25' | '100';
 
 export type Channel = "ticker" | 'fticker' | 'trades' | 'book' | 'candles';
 
@@ -41,15 +45,27 @@ export interface FundingPairTick extends TradingPairTick {
 }
 
 export interface BookTick {
-
+    price: number;
+    count: number;
+    amount: number;
 }
 
 export interface TradeTick {
-
+    id: number;
+    mts: number;
+    amount: number;
+    price: number;
+    rate?: number;
+    perion?: number;
 }
 
 export interface CandleTick {
-
+    mts: number;
+    open: number;
+    close: number;
+    high: number;
+    low: number;
+    volume: number;
 }
 
 export interface Ticks {
@@ -105,7 +121,7 @@ export type SubscriptionHandler =
     ((r: TradingPairTick) => void) |
     ((r: FundingPairTick) => void) |
     ((r: TradeTick) => void) |
-    ((r: BookTick) => void) |
+    ((r: BookTick[]) => void) |
     ((r: CandleTick) => void);
 
 export interface SubscriptionHandlerList {
