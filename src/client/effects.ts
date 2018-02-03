@@ -3,6 +3,7 @@ import * as BF from './bitfinex/types';
 import * as Exchange from './stores';
 import { replaceDictionary, replaceManyDictionary } from './utils';
 import { SubscriptionHandler, BookTick } from './bitfinex/types';
+import { setInterval } from 'timers';
 
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
@@ -47,14 +48,27 @@ export namespace Backend {
 
         let subscriptions: BF.SubscriptionHandlerList = {};
 
+        let cache: [string,BF.TradingPairTick][] = [];
+        function repaint() {
+            if (cache.length === 0)
+                return;
+
+            let newTickers = Object.assign({}, tickers);
+            cache.forEach(element => {
+                newTickers[element[0]] = element[1];               
+            });
+            tickers = newTickers;
+            tickerStore.set('tickers')(tickers);
+            cache = [];
+        }
+        setInterval(repaint, 100);
+
         function subscribeToAllTickers() {
             console.debug('Subscribing to Tickers...');
 
             symbols.forEach( s => {
                 let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
-
-                    tickers = replaceDictionary(tickers, s, t);
-                    tickerStore.set('tickers')(tickers);
+                    cache.push([s,t]);
                 });
                 subscriptions[result.key] = [result.handler];
             });
