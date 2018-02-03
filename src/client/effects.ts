@@ -146,6 +146,7 @@ export namespace Backend {
         let handler: (ts:BF.TradeTick[]) => void = ts => {
             let newTrades = trades.slice();
             newTrades.unshift(...ts);
+            newTrades.pop();
             trades = newTrades;
             store.set('trades')(trades);
         }
