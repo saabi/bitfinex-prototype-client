@@ -55,6 +55,9 @@ html {
     transform: translateY(-50%);
     padding-right: 4px;
 }
+#connectionStatus.error {
+    color: #F88;
+}
 
 #footer {
     grid-area: footer;

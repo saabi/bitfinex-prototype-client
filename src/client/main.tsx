@@ -25,12 +25,12 @@ function connectComponentsToStores(module: typeof Components) {
     let ConnectedTrades = connect (Exchange.TradesStore) ('symbol') (module.Trades);
     let ConnectedCandles = connect (Exchange.CandlesStore) ('symbol') (module.Candles);
 
-    let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol','isConnected') (class extends React.Component<Exchange.AppProps> {
+    let ConnectedApp = connect (Exchange.AppStore) ('currentSymbol','isConnected', 'isRateLimited') (class extends React.Component<Exchange.AppProps> {
         render() {
             let store = this.props.store;
             return (
                 <>
-                <Components.Header currentSymbol={store.get('currentSymbol')} isConnected={store.get('isConnected')}/>
+                <Components.Header currentSymbol={store.get('currentSymbol')} isConnected={store.get('isConnected')} isRateLimited={store.get('isRateLimited')}/>
                 <ConnectedTradesTicker />
                 <ConnectedFundingTicker />
                 <ConnectedBook />
@@ -91,8 +91,15 @@ async function launch() {
     render(App);
 
     // connects to backend server and then binds the stores.
-    await Backend.init();
-    bindStoresToBackend();
+    try {
+        await Backend.init();
+        bindStoresToBackend();
+    }
+    catch (e) {
+        if (e.error && e.error === 'ERR_RATE_LIMIT') {
+            Exchange.AppStore.set('isRateLimited')(true);
+        }
+    }
 }
 
 launch();
