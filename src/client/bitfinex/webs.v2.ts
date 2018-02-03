@@ -96,7 +96,7 @@ export namespace Stream {
      * Subscribes to a ticker channel.
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
-     */
+     */ 
     export function subscribeTradeTicker(symbol: string, handler: (o:BF.TradingPairTick) => void) {
         let channel = 'ticker';
         symbol = symbol.toUpperCase();
