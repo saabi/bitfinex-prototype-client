@@ -138,7 +138,7 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeBook(symbol: string, prec: BF.Precision, freq: number, len: number, handler: (o:BF.BookTick) => void) {
+    export function subscribeBook(symbol: string, prec: BF.Precision, freq: BF.Frequency, len: BF.Length, handler: (o:BF.BookTick[]) => void) {
         let channel = 'book';
         symbol = symbol.toUpperCase();
         return subscribe(channel + ':' + symbol, {
@@ -154,7 +154,7 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribeRawBook(symbol: string, len: number, handler: (o:BF.BookTick) => void) {
+    export function subscribeRawBook(symbol: string, len: number, handler: (o:BF.BookTick[]) => void) {
         let channel = 'book';
         symbol = symbol.toUpperCase();
         return subscribe(channel + ':' + symbol, {
@@ -256,9 +256,10 @@ const eventJumpTable: {
         },
         unsubscribed: (r: BF.BitfinexResponse) => {
             console.debug(r);
-            idMap = {};
-            keyMap = {};
-            subscriptions = {};
+            let key = keyMap[r.chanId];
+            delete keyMap[r.chanId];
+            delete subscriptions[key];
+            delete idMap[key];
         },
         error: (r: BF.BitfinexResponse) => {
             console.error(r);
@@ -303,7 +304,24 @@ const channelJumpTable: {
             }
         },
         trades: (r: any[]) => r,
-        book: (r: any[]) => r,
+        book: (r: any[] | any[][]) : BF.BookTick[] => {
+            if (Array.isArray(r[0])) {
+                let a = r as [number,number,number][];
+                return a.map( (i:[number,number,number]) => {
+                    return {
+                        price: i[0],
+                        count: i[1],
+                        amount: i[2]
+                    };
+                })
+            } else {
+                return [{
+                    price: r[0],
+                    count: r[1],
+                    amount: r[2]
+                }]
+            }
+    },
         candles: (r: any[]) => r
     };
 
