@@ -6,6 +6,10 @@ export type Channel = "ticker" | 'fticker' | 'trades' | 'book' | 'candles';
 
 export type EventType = 'auth' | 'subscribed' | 'unsubscribed' | 'info' | 'conf' | 'error';
 
+export interface BitfinexErrorMessage {
+    error: string;
+}
+
 export interface SymbolDetail {
     pair: string;
     price_precision: number;

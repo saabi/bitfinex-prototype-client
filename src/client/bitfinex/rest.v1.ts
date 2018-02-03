@@ -5,10 +5,10 @@ export namespace V1 {
 
     async function getJSON<T>(path: string): Promise<T> {
         let r = await fetch(apiUrl + path);
-        let json = await r.json() as T;
-        if (r.status === 200)
-            return json;
-        throw json;
+        let json = await r.json();
+        if (json.error || r.status !== 200)
+            throw json;
+        return json as T;
     }
 
     /**
