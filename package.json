@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "description": "A prototype Bitfinex client.",
   "scripts": {
+    "postinstall": "webpack --env production",
     "start": "webpack-dev-server --host 0.0.0.0",
-    "build": "webpack"
+    "start-dev": "webpack-dev-server --env development --host 0.0.0.0",
+    "build": "webpack --env production"
   },
   "author": "Sebastian Ferreyra",
   "license": "UNLICENSED",
