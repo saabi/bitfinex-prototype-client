@@ -304,7 +304,7 @@ const channelJumpTable: {
             }
         },
         trades: (r: any[]) : BF.TradeTick[] => {
-            console.log(r);
+            //console.log(r);
             if (Array.isArray(r[0])) {
                 let a = r as [number,number,number,number][];
                 return a.map( (i:[number,number,number,number]) => {
