@@ -50,6 +50,17 @@ interface GroupProps {
     selectedSymbol: string;
 }
 class TradeTickerRowGroup extends React.Component<GroupProps> {
+    shouldComponentUpdate(nextProps: GroupProps) {
+        const g = this.props.group;
+        const t = this.props.tickers;
+        const nt = nextProps.tickers;
+        let changed=false;
+        for (let i in g) {
+            let pair = g[i].pair
+            changed = changed || t[pair] !== nt[pair] || (this.props.selectedSymbol !== nextProps.selectedSymbol && (this.props.selectedSymbol === pair || nextProps.selectedSymbol === pair));
+        }
+        return changed;
+    }
     render() {
         const props = this.props;
         const group = props.group;
