@@ -105,8 +105,8 @@ table, p {
 }
 
 .ticker {
-    width: 100%;
-
+    width: 350px;
+    table-layout:fixed;
 }
 .ticker thead tr td {
     white-space: nowrap;
@@ -128,7 +128,7 @@ table, p {
 }
 
 .ticker tr td {
-    width: 0;
+    width: 25%;
     margin: 0;
     padding: 0;
     border: 0;
@@ -156,14 +156,16 @@ table, p {
 
 #orderbook table {
     display: inline-table;
-    width: 50%;
+    width: 300px;
     text-align: right;
     border-collapse: collapse;
+    table-layout:fixed;
 }
 #orderbook td {
     margin: 0;
     padding: 0;
     border: 0;
+    width: 25%;
 }
 #orderbook .bids td:first-child {
     background: #352;

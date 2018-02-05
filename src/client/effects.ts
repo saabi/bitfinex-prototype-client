@@ -61,7 +61,7 @@ export namespace Backend {
             tickerStore.set('tickers')(tickers);
             cache = [];
         }
-        setInterval(repaint, 100);
+        setInterval(repaint, 66);
 
         function subscribeToAllTickers() {
             console.debug('Subscribing to Tickers...');
@@ -122,22 +122,37 @@ export namespace Backend {
         let book: {[price:string]: BF.BookTick} = {};
         let result: {key: string; handler: BF.SubscriptionHandler} | null = null;
 
-        let handler: (ts:BF.BookTick[]) => void = ts => {
+        let cache: [string,BF.BookTick[]][] = [];
+        function repaint() {
+            if (cache.length === 0)
+                return;
+
             let newBook = Object.assign({}, book);
-            ts.forEach( t => {
-                let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
-                if (t.count > 0) {
-                    newBook[key] = t;
-                }
-                else {
-                    delete newBook[key];
-                }
-            });
+            cache.forEach(element => {
+                let s = element[0];
+                let ts = element[1];
+                ts.forEach( t => {
+                    let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
+                    if (t.count > 0) {
+                        newBook[key] = t;
+                    }
+                    else {
+                        delete newBook[key];
+                    }
+                });
+                        });
             book = newBook;
             store.set('book')(book);
+            cache = [];
         }
+        setInterval(repaint, 66);
 
-        const subscribe = (s:string) => Bitfinex.Stream.subscribeBook(s, 'P1', 'F0', '25', handler );
+
+
+
+        const subscribe = (s:string) => Bitfinex.Stream.subscribeBook(s, 'P1', 'F0', '25', ts => {
+            cache.push([s,ts]);
+        } );
         if (symbol) subscribe(symbol);
 
         store.on('symbol').subscribe((newSymbol:string | null) => {
