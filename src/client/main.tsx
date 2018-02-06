@@ -30,7 +30,12 @@ function connectComponentsToStores(module: typeof Components) {
             let store = this.props.store;
             return (
                 <>
-                <Components.Header currentSymbol={store.get('currentSymbol')} isConnected={store.get('isConnected')} isRateLimited={store.get('isRateLimited')}/>
+                <Components.Header 
+                    currentSymbol={store.get('currentSymbol')} 
+                    isConnected={store.get('isConnected')} 
+                    isConnecting={store.get('isConnecting')} 
+                    isRateLimited={store.get('isRateLimited') }
+                    onDisconnectionTest={() => store.set('testDisconnection')(true)}/>
                 <ConnectedTradesTicker />
                 <ConnectedFundingTicker />
                 <ConnectedBook />
