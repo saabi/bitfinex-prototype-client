@@ -63,6 +63,8 @@ export namespace Backend {
 
         let subscriptions: BF.Ticket[] = [];
         function subscribeToAllTickers() {
+            subscriptions = [];
+
             console.debug('Subscribing to Tickers...');
             symbols.forEach( s => {
                 let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
@@ -74,9 +76,6 @@ export namespace Backend {
         }
         // Resubscribes to trading tickers after connection failure.
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
-        Bitfinex.Stream.addDisconnectionHandler( () => {
-            subscriptions = [];
-        });
     }
 
     const FundingSymbols = [
@@ -92,7 +91,8 @@ export namespace Backend {
 
         function subscribeToAllTickers() {
             console.debug('Subscribing to Funding Tickers...');
-  
+
+            subscriptions = [];
             FundingSymbols.forEach( s => {
                 let ticket = Bitfinex.Stream.subscribeFundingTicker(s, t => {
 
@@ -104,9 +104,6 @@ export namespace Backend {
         }
 
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
-        Bitfinex.Stream.addDisconnectionHandler( () => {
-            subscriptions = [];
-        });
     }
 
     export async function bindOrderBookStore(store: Exchange.OrderBookStore) {
@@ -126,22 +123,25 @@ export namespace Backend {
         }
         setInterval(repaint, 66);
 
-        const subscribe = () => Bitfinex.Stream.subscribeBook(store.get('symbol')!, 'P1', 'F0', '25', ts => {
-            additions++;
-            ts.forEach( t => {
-                let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
-                if (t.count > 0) {
-                    nextBook[key] = t;
-                }
-                else {
-                    delete nextBook[key];
-                }
-            });
-        } );
+        const subscribe = () => {
+            book = {};
+            store.set('book')(book);
+            nextBook = {};
+            return Bitfinex.Stream.subscribeBook(store.get('symbol')!, 'P1', 'F0', '25', ts => {
+                additions++;
+                ts.forEach( t => {
+                    let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
+                    if (t.count > 0) {
+                        nextBook[key] = t;
+                    }
+                    else {
+                        delete nextBook[key];
+                    }
+                });
+            })
+        };
         Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
             console.debug('Subsribing to order book stream.');
-            book = {};
-            nextBook = {};
             subscribe();
         }});
 
@@ -154,10 +154,7 @@ export namespace Backend {
                     Bitfinex.Stream.unsubscribe(ticket);
                     ticket = null;
                 }
-                book = {};
-                store.set('book')(book);
-                nextBook = Object.assign({}, book);
-            ticket = subscribe();
+                ticket = subscribe();
             });
     }
 
@@ -165,14 +162,17 @@ export namespace Backend {
         let trades: BF.TradeTick[] = [];
         store.set('trades')(trades);
 
-        const subscribe = () => Bitfinex.Stream.subscribeTrades(store.get('symbol')!, ts => {
-            trades = ts.concat(trades);
-            trades.length = 30;
+        const subscribe = () => {
+            trades = [];
             store.set('trades')(trades);
-        });
+            return Bitfinex.Stream.subscribeTrades(store.get('symbol')!, ts => {
+                trades = ts.concat(trades);
+                trades.length = 30;
+                store.set('trades')(trades);
+            });
+        } 
         Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
             console.debug('Subsribing to trades stream.');
-            trades = [];
             subscribe();
         }});
 
@@ -185,8 +185,6 @@ export namespace Backend {
                     Bitfinex.Stream.unsubscribe(ticket);
                     ticket = null;
                 }
-                trades = [];
-                store.set('trades')(trades);
                 ticket = subscribe();
         });
     }
