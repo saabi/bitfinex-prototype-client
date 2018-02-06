@@ -5,8 +5,12 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 import * as express from 'express';
 import fetch from 'node-fetch';
 
+var morgan = require('morgan');
+const logger = require('express-logger');
+
 // Bitfinex v1 API is CORS restricted. This proxies calls through the wbepack-dev-server to bypass restriction.
 function setupBitfinexProxy(app: express.Application) {
+    app.use(morgan('combined'));
     app.get('/v1/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
             console.log('https://api.bitfinex.com' + req.path);
@@ -39,6 +43,9 @@ namespace Configurations {
             extensions: [".tsx", ".ts", ".js"]
         },
         plugins: [
+            new webpack.DefinePlugin({
+                'process.env.NODE_ENV': JSON.stringify('production')
+            }),
             new UglifyJSPlugin()
         ],
         output: {
