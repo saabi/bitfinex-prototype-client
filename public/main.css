@@ -70,11 +70,6 @@ html {
     grid-area: sidebar2;
 }
 
-#orderbook {
-    grid-area: underbar1;
-    white-space: nowrap;
-}
-
 #trades {
     grid-area: underbar2;    
 }
