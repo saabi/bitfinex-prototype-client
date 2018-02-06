@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as Exchange from '../../stores';
+import * as style from './style.css';
 
 interface BookRow {
     count: number;
@@ -52,9 +53,9 @@ export class OrderBook extends React.Component<Exchange.OrderBookProps> {
         });
 
         return (
-            <div id='orderbook' className='widget'>
+            <div id={style.orderBook} className='widget'>
                 <h3>Order Book{symbol}</h3>
-                <table className='asks'>
+                <table className={style.asks}>
                     <thead>
                         <tr>
                             <td>count</td>
@@ -67,7 +68,7 @@ export class OrderBook extends React.Component<Exchange.OrderBookProps> {
                         {bidTableRows}
                     </tbody>
                 </table>
-                <table className='bids'>
+                <table className={style.bids}>
                     <thead>
                         <tr>
                             <td>price</td>

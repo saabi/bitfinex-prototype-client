@@ -154,28 +154,6 @@ table, p {
     color: rgb(255, 128, 128);
 }
 
-#orderbook table {
-    display: inline-table;
-    width: 300px;
-    text-align: right;
-    border-collapse: collapse;
-    table-layout:fixed;
-}
-#orderbook td {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    width: 25%;
-}
-#orderbook .bids td:first-child {
-    background: #352;
-}
-#orderbook .asks td:last-child {
-    background: #422;
-}
-#orderbook table thead td {
-    background: none !important;
-}
 
 #trades table {
     width: 100%;

@@ -71,7 +71,7 @@ namespace Configurations {
                 },
                 {
                     test: /\.css$/,
-                    use: ['style-loader', 'css-loader']
+                    use: ['style-loader', 'typings-for-css-modules-loader?modules&namedExport&camelCase&localIdentName=[local][hash:base64:3]']
                 }
             ]
         },
@@ -94,7 +94,7 @@ namespace Configurations {
             before: setupBitfinexProxy,
             allowedHosts: ['.lan']
         }
-    }    
+    }
 }
 
 export default function config(env: any, argv: any) {
