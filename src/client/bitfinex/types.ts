@@ -127,4 +127,8 @@ export type SubscriptionHandler =
 export interface SubscriptionHandlerList {
     [key: string]: SubscriptionHandler[];
 }
-    
+
+export interface Ticket {
+    key: string;
+    handler: SubscriptionHandler;
+}

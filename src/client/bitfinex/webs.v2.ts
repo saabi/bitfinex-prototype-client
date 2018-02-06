@@ -57,7 +57,7 @@ export namespace Stream {
      * @param symbol The symbol pair name
      * @param handler A handler that receives new ticks.
      */
-    export function subscribe(key: string, payload: any, handler: BF.SubscriptionHandler) {
+    export function subscribe(key: string, payload: any, handler: BF.SubscriptionHandler) : BF.Ticket {
         let sub = subscriptions[key];
         if (!sub) {
             subscriptions[key] = sub = [];
@@ -75,16 +75,16 @@ export namespace Stream {
      * Unsubscribes from a channel.
      * @param channel 
      */
-    export function unsubscribe(key: string, handler: BF.SubscriptionHandler) {
-        let sub = subscriptions[key];
+    export function unsubscribe(t: BF.Ticket) {
+        let sub = subscriptions[t.key];
         if (!sub || sub.length === 0)
             throw new Error('Not subscribed.');
 
-        let i = sub.indexOf(handler);
+        let i = sub.indexOf(t.handler);
         if (i >= 0)
             sub.splice(i, 1);
         if (sub.length === 0) {
-            let chanId = idMap[key];
+            let chanId = idMap[t.key];
             wSocket.send(JSON.stringify({
                 event: "unsubscribe",
                 chanId

@@ -8,10 +8,28 @@ import { setInterval } from 'timers';
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
 let baseCoinGroups: { [name: string]: BF.SymbolDetail[] };
-let tickers: BF.Ticks;
+
+async function getBaseCoinGroups() {
+    symbolsDetails = await Bitfinex.V1.getSymbolsDetails();
+
+    let baseCoinGroups: { [name: string]: BF.SymbolDetail[] } = {};
+    for (let i = 0; i < symbolsDetails.length; i++) {
+        let s = symbolsDetails[i];
+        let baseCoinName = s.pair.substr(0, 3);
+        let baseCoin = baseCoinGroups[baseCoinName];
+        if (!baseCoin) {
+            baseCoinGroups[baseCoinName] = baseCoin = [];
+        }
+        baseCoin.push(s);
+    }
+    return baseCoinGroups;
+}
 
 export namespace Backend {
 
+    /** 
+     * Connects to the Bitfinex data stream.
+    */
     export async function init() {
         let status = await Bitfinex.V2.getStatus();
         if (status === 'maintenance') {
@@ -20,179 +38,153 @@ export namespace Backend {
     
         symbols = await Bitfinex.V1.getSymbols();
         symbolsDetails = await Bitfinex.V1.getSymbolsDetails();
-    
-        //#region Group symbols by base coin.
-        baseCoinGroups = {};
-        for (let i = 0; i < symbolsDetails.length; i++) {
-            let s = symbolsDetails[i];
-            let baseCoinName = s.pair.substr(0, 3);
-            let baseCoin = baseCoinGroups[baseCoinName];
-            if (!baseCoin) {
-                baseCoinGroups[baseCoinName] = baseCoin = [];
-            }
-            baseCoin.push(s);
-        }
-        //#endregion
-
-        tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
-        //console.debug(tickers);
+        baseCoinGroups = await getBaseCoinGroups();
 
         Bitfinex.Stream.connect();
     }
-    
+
     export async function bindTradeTickerStore(store: Exchange.TradeTickerStore) {
-        let tickerStore = store;
+        let tickers = await Bitfinex.V2.getTickers(symbols.map(s => 't' + s.toUpperCase()));
+        let nextTickers = Object.assign({}, tickers);
 
-        tickerStore.set('tickers')(tickers);
-        tickerStore.set('groups')(baseCoinGroups);
+        store.set('tickers')(tickers);
+        store.set('groups')(baseCoinGroups);
 
-        let subscriptions: BF.SubscriptionHandlerList = {};
-
-        let cache: [string,BF.TradingPairTick][] = [];
+        let waiting = 0;
         function repaint() {
-            if (cache.length === 0)
+            if (waiting === 0)
                 return;
 
-            let newTickers = Object.assign({}, tickers);
-            cache.forEach(element => {
-                newTickers[element[0]] = element[1];               
-            });
-            tickers = newTickers;
-            tickerStore.set('tickers')(tickers);
-            cache = [];
+            tickers = nextTickers;
+            store.set('tickers')(tickers);
+            nextTickers = Object.assign({}, tickers);
+            waiting = 0;
         }
         setInterval(repaint, 66);
 
+        let subscriptions: BF.Ticket[] = [];
         function subscribeToAllTickers() {
-            console.debug('Subscribing to Tickers...');
-
             symbols.forEach( s => {
                 let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
-                    cache.push([s,t]);
+                    waiting++;
+                    nextTickers[s] = t;               
                 });
-                subscriptions[result.key] = [result.handler];
+                subscriptions.push(result);
             });
-        }
-        function unsubscribeFromAllTickers() {
-            Object.getOwnPropertyNames(subscriptions).forEach( (n) => {
-                Bitfinex.Stream.unsubscribe(n, subscriptions[n][0]) 
-            });
-            subscriptions = {};
         }
         // Resubscribes to trading tickers after connection failure.
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
+        Bitfinex.Stream.addDisconnectionHandler( () => {
+            subscriptions = [];
+        });
     }
+
     const FundingSymbols = [
         'EUR', 'USD', 'BTC', 'ETH', 'XRP', 'EOS', 'BCH', 'NEO', 'IOT', 'LTC', 
         'OMG', 'ETC', 'XMR', 'DSH', 'ZEC', 'BTG', 'ETP', 'SAN', 'EDO'
     ]
     
     export async function bindFundingTickerStore(store: Exchange.FundingTickerStore) {
-        let tickerStore = store;
-
         let tickers = await Bitfinex.V2.getTickers(FundingSymbols.map(s => 'f' + s.toUpperCase()));
-        tickerStore.set('tickers')(tickers);
+        store.set('tickers')(tickers);
 
-        let subscriptions: BF.SubscriptionHandlerList = {};
+        let subscriptions: BF.Ticket[] = [];
 
         function subscribeToAllTickers() {
             console.debug('Subscribing to Tickers...');
   
             FundingSymbols.forEach( s => {
-                let result = Bitfinex.Stream.subscribeFundingTicker(s, t => {
+                let ticket = Bitfinex.Stream.subscribeFundingTicker(s, t => {
 
                     tickers = replaceDictionary(tickers, s, t);
-                    tickerStore.set('tickers')(tickers);
+                    store.set('tickers')(tickers);
                 });
-                subscriptions[result.key] = [result.handler];
+                subscriptions.push(ticket);
             });
         }
-        function unsubscribeFromAllTickers() {
-            Object.getOwnPropertyNames(subscriptions).forEach( (n) => {
-                Bitfinex.Stream.unsubscribe(n, subscriptions[n][0]) 
-            });
-            subscriptions = {};
-        }
-        // Resubscribes to trading tickers after connection failure.
+
         let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
+        Bitfinex.Stream.addDisconnectionHandler( () => {
+            subscriptions = [];
+        });
     }
 
     export async function bindOrderBookStore(store: Exchange.OrderBookStore) {
-        let symbol: string | null = store.get('symbol');
         let book: {[price:string]: BF.BookTick} = {};
-        let result: {key: string; handler: BF.SubscriptionHandler} | null = null;
+        let nextBook = Object.assign({}, book);
 
-        let cache: [string,BF.BookTick[]][] = [];
+        let additions = 0;
         function repaint() {
-            if (cache.length === 0)
+            if (additions === 0)
                 return;
 
-            let newBook = Object.assign({}, book);
-            cache.forEach(element => {
-                let s = element[0];
-                let ts = element[1];
-                ts.forEach( t => {
-                    let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
-                    if (t.count > 0) {
-                        newBook[key] = t;
-                    }
-                    else {
-                        delete newBook[key];
-                    }
-                });
-                        });
-            book = newBook;
+            book = nextBook;
             store.set('book')(book);
-            cache = [];
+            nextBook = Object.assign({}, book);
+            additions = 0;
         }
         setInterval(repaint, 66);
 
-
-
-
         const subscribe = (s:string) => Bitfinex.Stream.subscribeBook(s, 'P1', 'F0', '25', ts => {
-            cache.push([s,ts]);
+            additions++;
+            ts.forEach( t => {
+                let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
+                if (t.count > 0) {
+                    nextBook[key] = t;
+                }
+                else {
+                    delete nextBook[key];
+                }
+            });
         } );
+
+        let symbol: string | null = store.get('symbol');
         if (symbol) subscribe(symbol);
 
-        store.on('symbol').subscribe((newSymbol:string | null) => {
-            if (newSymbol && newSymbol !== symbol) {
-                if (result) {
-                    Bitfinex.Stream.unsubscribe(result.key, result.handler);
+        let ticket: BF.Ticket | null = null;
+
+        store.on('symbol')
+            .distinctUntilChanged()
+            .subscribe((newSymbol:string | null) => {
+                if (ticket) {
+                    Bitfinex.Stream.unsubscribe(ticket);
+                    ticket = null;
                     book = {};
                     store.set('book')(book);
                 }
-                result = subscribe(newSymbol);
-                symbol = newSymbol;
-            }
-        });
+                if (newSymbol) {
+                    ticket = subscribe(newSymbol);
+                    symbol = newSymbol;
+                }
+            });
     }
+
     export async function bindTradesStore(store: Exchange.TradesStore) {
         let symbol: string | null = store.get('symbol');
         let trades: BF.TradeTick[] = [];
-        let result: {key: string; handler: BF.SubscriptionHandler} | null = null;
+        let ticket: BF.Ticket | null = null;
 
-        let handler: (ts:BF.TradeTick[]) => void = ts => {
-            let newTrades = trades.slice();
-            newTrades.unshift(...ts);
-            newTrades.pop();
-            trades = newTrades;
+        const subscribe = (s:string) => Bitfinex.Stream.subscribeTrades(s, ts => {
+            trades = ts.concat(trades);
+            trades.length = 30;
             store.set('trades')(trades);
-        }
+        });
 
-        const subscribe = (s:string) => Bitfinex.Stream.subscribeTrades(s, handler );
         if (symbol) subscribe(symbol);
 
-        store.on('symbol').subscribe((newSymbol:string | null) => {
-            if (newSymbol && newSymbol !== symbol) {
-                if (result) {
-                    Bitfinex.Stream.unsubscribe(result.key, result.handler);
+        store.on('symbol')
+            .distinctUntilChanged()
+            .subscribe((symbol:string | null) => {
+                if (ticket) {
+                    Bitfinex.Stream.unsubscribe(ticket);
+                    ticket = null;
                     trades = [];
                     store.set('trades')(trades);
                 }
-                result = subscribe(newSymbol);
-                symbol = newSymbol;
-            }
+                if (symbol) {
+                    ticket = subscribe(symbol);
+                    symbol = symbol;
+                }
         });
     }
     export async function bindCandlesStore(store: Exchange.CandlesStore) {
