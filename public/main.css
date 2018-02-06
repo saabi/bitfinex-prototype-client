@@ -21,8 +21,8 @@ html {
         "sidebar1 content content"
         "sidebar2 underbar1 underbar2"
         "footer footer footer";
-    grid-template-columns: min-content auto auto;
-    grid-template-rows: 0fr auto auto 0fr;
+    grid-template-columns: min-content 50vw auto;
+    grid-template-rows: 0fr auto 39vh 0fr;
     justify-content: stretch;
     align-content: stretch;
 }
@@ -36,6 +36,7 @@ html {
     overflow-y: auto;
     position: relative;
     min-width: fit-content;
+    box-sizing: border-box;
 }
 
 #header {
@@ -102,6 +103,7 @@ table, p {
 .ticker {
     width: 350px;
     table-layout:fixed;
+    border-collapse: collapse;
 }
 .ticker thead tr td {
     white-space: nowrap;
