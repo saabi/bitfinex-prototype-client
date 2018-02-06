@@ -373,7 +373,7 @@ const channelJumpTable: {
 
 function messageHandler(msg: MessageEvent) {
     let json = JSON.parse(msg.data);
-    console.debug(json);
+    //console.debug(json);
     if (Array.isArray(json)) {
         let chanId = json[0];
         let payload = json[1];
