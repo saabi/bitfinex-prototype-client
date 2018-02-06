@@ -3,7 +3,6 @@ import * as BF from './bitfinex/types';
 import * as Exchange from './stores';
 import { replaceDictionary, replaceManyDictionary } from './utils';
 import { SubscriptionHandler, BookTick } from './bitfinex/types';
-import { setInterval } from 'timers';
 
 let symbols: string[];
 let symbolsDetails: BF.SymbolDetail[];
