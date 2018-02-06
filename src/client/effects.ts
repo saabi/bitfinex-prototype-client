@@ -127,7 +127,6 @@ export namespace Backend {
         setInterval(repaint, 66);
 
         const subscribe = () => Bitfinex.Stream.subscribeBook(store.get('symbol')!, 'P1', 'F0', '25', ts => {
-            console.debug('Subsribing to order book stream.');
             additions++;
             ts.forEach( t => {
                 let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
@@ -139,7 +138,10 @@ export namespace Backend {
                 }
             });
         } );
-        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) subscribe()});
+        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
+            console.debug('Subsribing to order book stream.');
+            subscribe();
+        }});
 
         let ticket: BF.Ticket | null = null;
 
@@ -162,12 +164,14 @@ export namespace Backend {
         store.set('trades')(trades);
 
         const subscribe = () => Bitfinex.Stream.subscribeTrades(store.get('symbol')!, ts => {
-            console.debug('Subsribing to trades stream.');
             trades = ts.concat(trades);
             trades.length = 30;
             store.set('trades')(trades);
         });
-        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) subscribe()});
+        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
+            console.debug('Subsribing to trades stream.');
+            subscribe();
+        }});
 
         let ticket: BF.Ticket | null = null;
 
