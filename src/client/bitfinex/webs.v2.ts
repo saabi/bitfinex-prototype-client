@@ -11,6 +11,10 @@ export namespace Stream {
         return connected;
     }
 
+    export function simulateDisconnection() {
+        disconnectionTest = true;
+        wSocket.close();
+    }
     /**
      * Adds a handler that will be called everytime a connection is established.
      * @param handler The handler.
@@ -25,6 +29,21 @@ export namespace Stream {
     export function removeConnectionHandler(handler: () => void) {
         connectionHandlers = connectionHandlers.filter((h) => h !== handler);
     }
+    /**
+     * Adds a handler that will be called everytime a connection is established.
+     * @param handler The handler.
+     */
+    export function addReconnectionHandler(handler: () => void) {
+        reconnectionHandlers.push(handler);
+    }
+    /**
+     * Removes a handler.
+     * @param handler The handler.
+     */
+    export function removeReconnectionHandler(handler: () => void) {
+        reconnectionHandlers = reconnectionHandlers.filter((h) => h !== handler);
+    }
+
 
     /**
      * Adds a handler that will be called everytime the connection is closed.
@@ -38,7 +57,7 @@ export namespace Stream {
      * @param handler The handler.
      */
     export function removeDisconnectionHandler(handler: (wasClean:boolean) => void) {
-        disconnectionHandlers = connectionHandlers.filter((h) => h !== handler);
+        disconnectionHandlers = disconnectionHandlers.filter((h) => h !== handler);
     }
 
     /**
@@ -187,11 +206,13 @@ export namespace Stream {
 
 var wSocket: WebSocket;
 var connectionHandlers: (() => void)[] = [];
+var reconnectionHandlers: (() => void)[] = [];
 var disconnectionHandlers: ((wasClean:boolean) => void)[] = [];
 var connected = false;
 var subscriptions: BF.SubscriptionHandlerList = {};
 var idMap: { [key: string]: number } = {};
 var keyMap: { [id: number]: string } = {};
+var disconnectionTest = false;
 
 Stream.addConnectionHandler(() => connected = true);
 
@@ -205,21 +226,26 @@ function reconnect() {
 
 function connectionHandler(ev: Event): any {
     console.log('Connected to Bitfinex.');
+    subscriptions = {};
+    idMap = {};
+    keyMap = {};
     //console.debug(ev);
-    connectionHandlers.forEach((handler) => handler());
+    setTimeout(() => connectionHandlers.forEach((handler) => handler()), 100);
 }
 
 function disconnectionHandler(ev: CloseEvent) {
     connected = false;
     disconnectionHandlers.forEach((handler) => handler(ev.wasClean));
-    if (ev.wasClean) {
+    if (ev.wasClean && !disconnectionTest) {
+        disconnectionTest = false;
         console.log('Bitfinex connection closed.');
         console.debug(ev);
     }
     else {
         console.error('Bitfinex connection closed unexcpectedly.');
         console.debug(ev);
-        setTimeout(reconnect, 10000);
+        reconnectionHandlers.forEach((handler) => handler());
+        reconnect();
     }
 }
 
@@ -347,6 +373,7 @@ const channelJumpTable: {
 
 function messageHandler(msg: MessageEvent) {
     let json = JSON.parse(msg.data);
+    console.debug(json);
     if (Array.isArray(json)) {
         let chanId = json[0];
         let payload = json[1];
