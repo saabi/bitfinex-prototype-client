@@ -1,6 +1,7 @@
 import * as webpack from "webpack";
 import * as path from "path";
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 import * as express from 'express';
 import fetch from 'node-fetch';
@@ -33,7 +34,7 @@ namespace Configurations {
                 },
                 {
                     test: /\.css$/,
-                    use: ['style-loader', 'css-loader']
+                    use: ['style-loader', 'typings-for-css-modules-loader?modules&namedExport&camelCase&localIdentName=[local][hash:base64:3]']
                 }
             ]
         },
@@ -44,6 +45,7 @@ namespace Configurations {
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': JSON.stringify('production')
             }),
+            //new ExtractTextPlugin('public/styles.css'),
             new UglifyJSPlugin()
         ],
         output: {
