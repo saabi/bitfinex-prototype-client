@@ -111,6 +111,7 @@ export namespace Backend {
 
     export async function bindOrderBookStore(store: Exchange.OrderBookStore) {
         let book: {[price:string]: BF.BookTick} = {};
+        store.set('book')(book);
         let nextBook = Object.assign({}, book);
 
         let additions = 0;
@@ -151,6 +152,7 @@ export namespace Backend {
                     ticket = null;
                     book = {};
                     store.set('book')(book);
+                    nextBook = Object.assign({}, book);
                 }
                 if (newSymbol) {
                     ticket = subscribe(newSymbol);
@@ -162,6 +164,7 @@ export namespace Backend {
     export async function bindTradesStore(store: Exchange.TradesStore) {
         let symbol: string | null = store.get('symbol');
         let trades: BF.TradeTick[] = [];
+        store.set('trades')(trades);
         let ticket: BF.Ticket | null = null;
 
         const subscribe = (s:string) => Bitfinex.Stream.subscribeTrades(s, ts => {
