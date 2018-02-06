@@ -230,7 +230,7 @@ function connectionHandler(ev: Event): any {
     idMap = {};
     keyMap = {};
     //console.debug(ev);
-    setTimeout(() => connectionHandlers.forEach((handler) => handler()), 100);
+    connectionHandlers.forEach((handler) => handler());
 }
 
 function disconnectionHandler(ev: CloseEvent) {
