@@ -140,6 +140,8 @@ export namespace Backend {
         } );
         Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
             console.debug('Subsribing to order book stream.');
+            book = {};
+            nextBook = {};
             subscribe();
         }});
 
@@ -151,11 +153,11 @@ export namespace Backend {
                 if (ticket) {
                     Bitfinex.Stream.unsubscribe(ticket);
                     ticket = null;
-                    book = {};
-                    store.set('book')(book);
-                    nextBook = Object.assign({}, book);
                 }
-                ticket = subscribe();
+                book = {};
+                store.set('book')(book);
+                nextBook = Object.assign({}, book);
+            ticket = subscribe();
             });
     }
 
@@ -170,6 +172,7 @@ export namespace Backend {
         });
         Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) {
             console.debug('Subsribing to trades stream.');
+            trades = [];
             subscribe();
         }});
 
@@ -181,9 +184,9 @@ export namespace Backend {
                 if (ticket) {
                     Bitfinex.Stream.unsubscribe(ticket);
                     ticket = null;
-                    trades = [];
-                    store.set('trades')(trades);
                 }
+                trades = [];
+                store.set('trades')(trades);
                 ticket = subscribe();
         });
     }
