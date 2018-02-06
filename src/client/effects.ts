@@ -63,6 +63,7 @@ export namespace Backend {
 
         let subscriptions: BF.Ticket[] = [];
         function subscribeToAllTickers() {
+            console.debug('Subscribing to Tickers...');
             symbols.forEach( s => {
                 let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
                     waiting++;
@@ -90,7 +91,7 @@ export namespace Backend {
         let subscriptions: BF.Ticket[] = [];
 
         function subscribeToAllTickers() {
-            console.debug('Subscribing to Tickers...');
+            console.debug('Subscribing to Funding Tickers...');
   
             FundingSymbols.forEach( s => {
                 let ticket = Bitfinex.Stream.subscribeFundingTicker(s, t => {
@@ -125,7 +126,8 @@ export namespace Backend {
         }
         setInterval(repaint, 66);
 
-        const subscribe = (s:string) => Bitfinex.Stream.subscribeBook(s, 'P1', 'F0', '25', ts => {
+        const subscribe = () => Bitfinex.Stream.subscribeBook(store.get('symbol')!, 'P1', 'F0', '25', ts => {
+            console.debug('Subsribing to order book stream.');
             additions++;
             ts.forEach( t => {
                 let key = (t.amount > 0 ? 'bid' : 'ask') + t.price.toString();
@@ -137,15 +139,13 @@ export namespace Backend {
                 }
             });
         } );
-
-        let symbol: string | null = store.get('symbol');
-        if (symbol) subscribe(symbol);
+        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) subscribe()});
 
         let ticket: BF.Ticket | null = null;
 
         store.on('symbol')
             .distinctUntilChanged()
-            .subscribe((newSymbol:string | null) => {
+            .subscribe((symbol:string | null) => {
                 if (ticket) {
                     Bitfinex.Stream.unsubscribe(ticket);
                     ticket = null;
@@ -153,26 +153,23 @@ export namespace Backend {
                     store.set('book')(book);
                     nextBook = Object.assign({}, book);
                 }
-                if (newSymbol) {
-                    ticket = subscribe(newSymbol);
-                    symbol = newSymbol;
-                }
+                ticket = subscribe();
             });
     }
 
     export async function bindTradesStore(store: Exchange.TradesStore) {
-        let symbol: string | null = store.get('symbol');
         let trades: BF.TradeTick[] = [];
         store.set('trades')(trades);
-        let ticket: BF.Ticket | null = null;
 
-        const subscribe = (s:string) => Bitfinex.Stream.subscribeTrades(s, ts => {
+        const subscribe = () => Bitfinex.Stream.subscribeTrades(store.get('symbol')!, ts => {
+            console.debug('Subsribing to trades stream.');
             trades = ts.concat(trades);
             trades.length = 30;
             store.set('trades')(trades);
         });
+        Bitfinex.Stream.addConnectionHandler(() => {if (store.get('symbol')) subscribe()});
 
-        if (symbol) subscribe(symbol);
+        let ticket: BF.Ticket | null = null;
 
         store.on('symbol')
             .distinctUntilChanged()
@@ -183,20 +180,30 @@ export namespace Backend {
                     trades = [];
                     store.set('trades')(trades);
                 }
-                if (symbol) {
-                    ticket = subscribe(symbol);
-                    symbol = symbol;
-                }
+                ticket = subscribe();
         });
     }
     export async function bindCandlesStore(store: Exchange.CandlesStore) {
     }
     export async function bindAppStore(store: Exchange.AppStore) {
         Bitfinex.Stream.addConnectionHandler(() => {
+            store.set('isConnecting')(false);
             store.set('isConnected')(true);
         });
+        Bitfinex.Stream.addReconnectionHandler(() => {
+            store.set('isConnecting')(true);
+        })
+
         Bitfinex.Stream.addDisconnectionHandler((wasClean:boolean) => {
             store.set('isConnected')(false);
         });
+        store.on('testDisconnection')
+            .distinctUntilChanged()
+            .subscribe( v => {
+                if (v) {
+                    Bitfinex.Stream.simulateDisconnection();
+                    store.set('testDisconnection')(false);
+                }
+            });
     }
 }
