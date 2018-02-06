@@ -6,14 +6,12 @@ import * as express from 'express';
 import fetch from 'node-fetch';
 
 var morgan = require('morgan');
-const logger = require('express-logger');
 
 // Bitfinex v1 API is CORS restricted. This proxies calls through the wbepack-dev-server to bypass restriction.
 function setupBitfinexProxy(app: express.Application) {
     app.use(morgan('combined'));
     app.get('/v1/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
-            console.log('https://api.bitfinex.com' + req.path);
             let response = await fetch('https://api.bitfinex.com' + req.path);
             let json = await response.json();
             res.json(json);
