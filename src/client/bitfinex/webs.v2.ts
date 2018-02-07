@@ -104,14 +104,16 @@ export namespace Stream {
             sub.splice(i, 1);
         if (sub.length === 0) {
             let chanId = idMap[t.key];
-            wSocket.send(JSON.stringify({
-                event: "unsubscribe",
-                chanId
-            }));
+            if (chanId) {
+                delete keyMap[chanId];
+                delete subscriptions[t.key];
+                delete idMap[t.key];
+                wSocket.send(JSON.stringify({
+                    event: "unsubscribe",
+                    chanId
+                }));
+            }
         }
-        delete keyMap[idMap[t.key]];
-        delete subscriptions[t.key];
-        delete idMap[t.key];
     }
 
     /**
@@ -285,7 +287,7 @@ const eventJumpTable: {
         },
         unsubscribed: (r: BF.BitfinexResponse) => {
             console.debug(r);
-            let key = keyMap[r.chanId];
+            //let key = keyMap[r.chanId];
         },
         error: (r: BF.BitfinexResponse) => {
             console.error(r);
