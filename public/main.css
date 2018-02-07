@@ -21,12 +21,26 @@ html {
         "sidebar1 content content"
         "sidebar2 underbar1 underbar2"
         "footer footer footer";
-    grid-template-columns: min-content 50vw auto;
+    grid-template-columns: 35vw 45vw auto;
     grid-template-rows: 0fr auto 39vh 0fr;
     justify-content: stretch;
     align-content: stretch;
 }
 
+@media (orientation:portrait) {
+    #app-root {
+        grid-template-areas: 
+            "header"
+            "sidebar1"
+            "sidebar2"
+            "content"
+            "underbar1"
+            "underbar2"
+            "footer";
+        grid-template-columns: 100%;
+        grid-template-rows: 0fr auto auto auto 22% 22% 0fr;
+        }
+}
 .widget {
     margin: 2px;
     border-radius: 2px;
@@ -42,19 +56,22 @@ html {
 #header {
     grid-area: header;
     position: relative;
+    display: grid;
+    grid-template-areas: "title symbol connection";
+    grid-template-columns: auto auto auto;
+}
+
+#header header {
+    grid-area: title;
 }
 #currentSymbol {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateY(-50%);
+    grid-area: symbol;
+    text-align: center;
 }
 #connectionStatus {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    padding-right: 4px;
+    grid-area: connection;
+    justify-content: flex-end;
+    text-align: right;
 }
 #connectionStatus.error {
     color: #F88;
@@ -101,7 +118,7 @@ table, p {
 }
 
 .ticker {
-    width: 350px;
+    width: 100%;
     table-layout:fixed;
     border-collapse: collapse;
 }

@@ -15,8 +15,10 @@ export class Header extends React.Component<HeaderProps> {
         let connectionState = rl ? 'Rate Limited!' : ( this.props.isConnected ? 'Connected' : this.props.isConnecting? 'Connecting...' : 'Disconnected' );
         return (
             <div id='header'>
-                <h1>Bitfinex</h1>
-                <h2>Prototype Client</h2>
+                <header>
+                    <h1>Bitfinex</h1>
+                    <h2>Prototype Client</h2>
+                </header>
                 <p id="currentSymbol">{symbol}</p>
                 <p id='connectionStatus' className={rl? 'error' : ''}>{connectionState}<button disabled={!this.props.isConnected} onClick={ this.props.onDisconnectionTest }>Disconnection Test</button></p>
             </div>
