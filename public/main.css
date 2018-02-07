@@ -173,6 +173,7 @@ table, p {
 #trades table {
     width: 100%;
     text-align: right;
+    border-collapse: collapse;
 }
 #trades .bought {
     background: #352;
