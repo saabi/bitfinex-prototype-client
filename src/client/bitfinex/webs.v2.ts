@@ -109,6 +109,9 @@ export namespace Stream {
                 chanId
             }));
         }
+        delete keyMap[idMap[t.key]];
+        delete subscriptions[t.key];
+        delete idMap[t.key];
     }
 
     /**
@@ -283,9 +286,6 @@ const eventJumpTable: {
         unsubscribed: (r: BF.BitfinexResponse) => {
             console.debug(r);
             let key = keyMap[r.chanId];
-            delete keyMap[r.chanId];
-            delete subscriptions[key];
-            delete idMap[key];
         },
         error: (r: BF.BitfinexResponse) => {
             console.error(r);
