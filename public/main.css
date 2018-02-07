@@ -59,6 +59,7 @@ html {
     display: grid;
     grid-template-areas: "title symbol connection";
     grid-template-columns: auto auto auto;
+    align-items: center;
 }
 
 #header header {
