@@ -1,13 +1,16 @@
 import * as React from 'react';
 import * as Exchange from '../../stores';
+import { SymbolDetail, Ticks, FundingPairTick } from '../../bitfinex/types';
+import { connect, createStore, Store as UnduxStore } from 'undux';
 import { OrderButton } from '../order-button';
 import { TickerOrder, OrderDirection } from '../../stores/types';
-import { SymbolDetail, Ticks, FundingPairTick } from '../../bitfinex/types';
+import { TickerSortingModel, TickerSortingStore } from '../../stores/ticker-sorter';
 
 interface RowProps {
     symbol: string;
     tick: FundingPairTick;
 }
+
 class FundingTickerRow extends React.Component<RowProps> {
     shouldComponentUpdate(nextProps: RowProps) {
         return nextProps.tick !== this.props.tick;
@@ -27,14 +30,62 @@ class FundingTickerRow extends React.Component<RowProps> {
     }
 }
 
-export class FundingTicker extends React.Component<Exchange.FundingTickerProps> {
+interface State {
+    sortingStore: TickerSortingStore;
+}
 
+export class FundingTicker extends React.Component<Exchange.FundingTickerProps, State> {
+    BoundOrderButton: React.ComponentClass<{
+        id: string;
+    }>;
+
+    constructor(props: Exchange.FundingTickerProps) {
+        super(props);
+        const sortingStore = createStore<TickerSortingModel>({
+            direction: OrderDirection.unsorted,
+            column: 'symbol'
+        });
+        this.state = {
+            sortingStore: sortingStore
+        };
+        this.BoundOrderButton = connect(sortingStore) ('direction','column') (OrderButton);
+
+        const self = this;
+        sortingStore.on('direction')
+            .subscribe(v => { self.forceUpdate() }  );
+        sortingStore.on('column')
+            .subscribe(v => { self.forceUpdate() }  );
+    }
     
     render() {
-        const handleSorting = (id: string, direction: OrderDirection) => {
-        }
         const store = this.props.store;
         const tickers = store.get('tickers');
+
+        const sortingStore = this.state.sortingStore;
+        const column = sortingStore.get('column');
+        const direction = sortingStore.get('direction');
+        const sortedTickers = Object.getOwnPropertyNames(tickers).map(symbol => ({s:symbol, t:tickers[symbol] as FundingPairTick}) );
+        sortedTickers.sort((a,b) => {
+            if (direction !== OrderDirection.unsorted) {
+                let c = a;
+                let d = b;
+                if ( direction === OrderDirection.down) {
+                    c = b;
+                    d = a;
+                }
+                switch (column) {
+                    case 'symbol':
+                        return c.s > d.s ? 1 : -1;
+                    case 'last':
+                        return c.t.lastPrice - d.t.lastPrice;
+                    case '24hr':
+                        return c.t.dailyChangePerc - d.t.dailyChangePerc;
+                    case 'volume':
+                        return c.t.volume - d.t.volume;
+                }
+            }
+            return 0;
+        })
 
         return (
             <div id='fundingticker' className='widget'>
@@ -42,14 +93,14 @@ export class FundingTicker extends React.Component<Exchange.FundingTickerProps> 
                 <table className='ticker'>
                     <thead>
                         <tr>
-                            <td>symbol<OrderButton id='symbol' onDirection={handleSorting} /></td>
-                            <td>last<OrderButton id='last' onDirection={handleSorting} /></td>
-                            <td>24hr<OrderButton id='24hr' onDirection={handleSorting} /></td>
-                            <td>volume<OrderButton id='volume' onDirection={handleSorting} /></td>
+                            <td>symbol<this.BoundOrderButton id='symbol' /></td>
+                            <td>last<this.BoundOrderButton id='last' /></td>
+                            <td>24hr<this.BoundOrderButton id='24hr' /></td>
+                            <td>volume<this.BoundOrderButton id='volume' /></td>
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.getOwnPropertyNames(tickers).map(symbol => <FundingTickerRow key={symbol} symbol={symbol} tick={tickers[symbol] as FundingPairTick} />)}
+                        {sortedTickers.map(a => <FundingTickerRow key={a.s} symbol={a.s} tick={a.t} />)}
                     </tbody>
                 </table>
             </div>

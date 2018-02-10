@@ -1,30 +1,32 @@
 import * as React from 'react';
-import { OrderDirection } from '../../stores/types';
+import { OrderDirection, TickerOrder } from '../../stores/types';
+import { TickerSortingStore } from '../../stores/ticker-sorter';
 
-interface Props {
+interface TradeSortingProps {
     id: string;
-    onDirection?: (id: string, direction: OrderDirection) => void;
+    store: TickerSortingStore;
 }
 
-interface State {
-    direction: OrderDirection;
-}
-
-export class OrderButton extends React.Component<Props, State> {
-    constructor(props:Props) {
+export class OrderButton extends React.Component<TradeSortingProps> {
+    constructor(props:TradeSortingProps) {
         super(props);
-        this.state = {direction:OrderDirection.unsorted};
     }
     render() {
+        const store = this.props.store;
+        const id = this.props.id;
         let handleClick = () => {
-            this.setState( (previous: State) => {
-                return {direction: (previous.direction + 1) % 3} }
-            );
-            if (this.props.onDirection)
-                this.props.onDirection(this.props.id, this.state.direction);
+            const column = store.get('column');
+            let d = store.get('direction');    
+            if (column !== id) {
+                store.set('column')(this.props.id as TickerOrder);
+                if (d === OrderDirection.unsorted)
+                    store.set('direction')( (d + 1) % 3 );
+            } else
+                store.set('direction')( (d + 1) % 3 );
         };
-        let d = this.state.direction;
-        let label = d===OrderDirection.up?'▴':d===OrderDirection.down?'▾':''
+        let d = store.get('direction');
+        let isThisButton = store.get('column') === id;
+        let label = isThisButton ? (d===OrderDirection.up?'▴':d===OrderDirection.down?'▾':'') : '';
         return (
             <button onClick={handleClick}>{label}</button>
         )
