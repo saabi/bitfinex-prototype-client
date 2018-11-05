@@ -16,12 +16,12 @@
     border: 0;
     width: 25%;
 }
-#order-book .bids td:first-child {
+#order-book .bids tbody tr {
     background: #352;
 }
-#order-book .asks td:last-child {
+#order-book .asks tbody tr {
     background: #422;
 }
 #order-book table thead td {
     background: none !important;
-}
+}
