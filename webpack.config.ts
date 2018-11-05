@@ -13,7 +13,16 @@ function setupBitfinexProxy(app: express.Application) {
     app.use(morgan('combined'));
     app.get('/v1/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
-            let response = await fetch('https://api.bitfinex.com' + req.path);
+            let response = await fetch('https://api.bitfinex.com' + req.url);
+            let json = await response.json();
+            res.json(json);
+        } catch (e) {
+            next(e)
+        }
+    });
+    app.get('/v2/*', async function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            let response = await fetch('https://api.bitfinex.com' + req.url);
             let json = await response.json();
             res.json(json);
         } catch (e) {

@@ -3,7 +3,7 @@ import { getJSON } from './util';
 
 export namespace V2 {
 
-    const apiUrl = 'https://api.bitfinex.com/v2/';
+    const apiUrl = '/v2/';
 
     /**
      * Returns the Bitfinex API server status.
