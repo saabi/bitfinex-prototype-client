@@ -6,6 +6,7 @@ import { OrderButton } from '../order-button';
 import { TickerOrder, OrderDirection } from '../../stores/types';
 import { SymbolDetail, Ticks, TradingPairTick } from '../../bitfinex/types';
 import { TickerSortingModel, TickerSortingStore } from '../../stores/ticker-sorter';
+import * as style from './style.css';
 
 interface RowProps1 {
     symbol: string;
@@ -92,7 +93,7 @@ class TradeTickerRowGroup extends React.Component<GroupProps> {
         const group = props.group;
         let c = 0;
         return (
-            <tbody>
+            <tbody className={style.rowGroup}>
                 {group.map(gi => {
                     c++;
                     const pair = gi.pair;
