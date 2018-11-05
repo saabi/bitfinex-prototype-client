@@ -65,17 +65,17 @@ export namespace Backend {
         function subscribeToAllTickers() {
             subscriptions = [];
 
-            console.debug('Subscribing to Tickers...');
-            symbols.forEach( s => {
-                let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
-                    waiting++;
-                    nextTickers[s] = t;               
-                });
-                subscriptions.push(result);
-            });
+            // console.debug('Subscribing to Tickers...');
+            // symbols.forEach( s => {
+            //     let result = Bitfinex.Stream.subscribeTradeTicker(s, t => {
+            //         waiting++;
+            //         nextTickers[s] = t;               
+            //     });
+            //     subscriptions.push(result);
+            // });
         }
         // Resubscribes to trading tickers after connection failure.
-        let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
+        //let tickerSubscriptions = Bitfinex.Stream.addConnectionHandler(subscribeToAllTickers)
     }
 
     const FundingSymbols = [
