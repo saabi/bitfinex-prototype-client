@@ -1,11 +1,12 @@
 {
   "name": "bitfinex-prototype-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A prototype Bitfinex client.",
   "scripts": {
     "postinstall": "webpack --env production",
     "start": "webpack-dev-server --host 0.0.0.0",
     "start-dev": "webpack-dev-server --env development --host 0.0.0.0",
+    "debug": "webpack-dev-server --env development --host 0.0.0.0 --debug",
     "build": "webpack --env production"
   },
   "author": "Sebastian Ferreyra",

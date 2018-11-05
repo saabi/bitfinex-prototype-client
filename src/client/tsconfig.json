@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["ES2017", "dom"],
+    "lib": ["es2017", "dom"],
     "module": "amd",
     "moduleResolution": "node",
     "pretty": true,

@@ -91,7 +91,8 @@ namespace Configurations {
         },
         plugins: [
             new webpack.NamedModulesPlugin(),
-            new webpack.HotModuleReplacementPlugin()],
+            new webpack.HotModuleReplacementPlugin()
+        ],
         output: {
             filename: 'main.js',
             path: path.resolve(__dirname, 'public/js/dist'),
